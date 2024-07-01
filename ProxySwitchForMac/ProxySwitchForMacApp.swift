@@ -28,12 +28,27 @@ struct ProxySwitchForMacApp: App {
         //        .handlesExternalEvents(matching: Set(arrayLiteral: "*"))
         
         Window("ProxySwitch", id: "mainwindow") {
-            ContentView(appState: appState)
-               .frame(minWidth:500, idealWidth: 500, minHeight: 180, idealHeight: 180)
-               .fixedSize() // 强制内容视图保持固定大小
+            if #available(macOS 15.0, *) {
+                ContentView(appState: appState)
+                    .frame(minWidth:500, idealWidth: 500, minHeight: 180, idealHeight: 180)
+                    .fixedSize() // 强制内容视图保持固定大小
+                    .containerBackground(.ultraThinMaterial, for: .window)
+            } else {
+                // Fallback on earlier versions
+                ContentView(appState: appState)
+                    .frame(minWidth:500, idealWidth: 500, minHeight: 180, idealHeight: 180)
+                    .fixedSize() // 强制内容视图保持固定大小
+            }
         }
         .windowResizability(.contentSize) // 窗口大小适配View大小
 //        .windowStyle(HiddenTitleBarWindowStyle()) // 隐藏窗口TitleBar
+//        .defaultWindowPlacement {
+//            content, context in
+//            var size = content.sizeThatFits(.unspecified)
+//            let displayBounds = context.defaultDisplay.visibleRect
+////            size = zoomToFit(ideal: size, bounds: displayBounds)
+//            return WindowPlacement(size: size)
+//        }
 
         Settings {
 //            SettingsView()
