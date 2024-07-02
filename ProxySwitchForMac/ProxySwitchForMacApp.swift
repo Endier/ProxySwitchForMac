@@ -1,4 +1,3 @@
-//
 //  ProxySwitchForMacApp.swift
 //  ProxySwitchForMac
 //
@@ -27,12 +26,11 @@ struct ProxySwitchForMacApp: App {
         //        .windowToolbarStyle(UnifiedWindowToolbarStyle())
         //        .handlesExternalEvents(matching: Set(arrayLiteral: "*"))
         
-        Window("ProxySwitch", id: "mainwindow") {
+        Window("AppName", id: "mainwindow") {
             if #available(macOS 15.0, *) {
                 ContentView(appState: appState)
-                    .frame(minWidth:500, idealWidth: 500, minHeight: 180, idealHeight: 180)
                     .fixedSize() // 强制内容视图保持固定大小
-                    .containerBackground(.ultraThinMaterial, for: .window)
+                    .containerBackground(.regularMaterial, for: .window) // 窗口材质
             } else {
                 // Fallback on earlier versions
                 ContentView(appState: appState)
@@ -57,7 +55,7 @@ struct ProxySwitchForMacApp: App {
         MenuBarExtra {
             MenuBarView(appState: appState)
         } label: {
-            if appState.isOn {
+            if appState.proxySettings.isOn {
                 Image("MenuBarIcon")
             } else {
                 Image(systemName: "network")
@@ -73,12 +71,11 @@ extension KeyboardShortcuts.Name {
 
 // 创建全局对象和其属性
 class AppState: ObservableObject {
-    @Published var isOn: Bool = getProxyStatus(serviceNames: getSystemNetworkServiceNames())
-    
+    @Published var proxySettings: ProxySettings = getProxySettings(serviceNames: getSystemNetworkServiceNames())
     // 设置自定义全局快捷键逻辑
     init() {
         KeyboardShortcuts.onKeyUp(for: .proxySwitch) { [self] in
-            isOn.toggle()
+            proxySettings.isOn.toggle()
         }
     }
 }

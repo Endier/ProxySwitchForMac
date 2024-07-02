@@ -7,8 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C36A04F02C336D5B00AEBE3D /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C36A04EF2C336D5B00AEBE3D /* Localizable.xcstrings */; };
 		C39D79932C2BA26D00D55E65 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C39D79922C2BA26D00D55E65 /* MenuBarView.swift */; };
-		C39D79952C2BA29200D55E65 /* ProxySetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C39D79942C2BA29200D55E65 /* ProxySetting.swift */; };
+		C39D79952C2BA29200D55E65 /* SystemNetworkSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = C39D79942C2BA29200D55E65 /* SystemNetworkSettings.swift */; };
 		C3F5E1C62C2B9FE6004DD66D /* ProxySwitchForMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F5E1C52C2B9FE6004DD66D /* ProxySwitchForMacApp.swift */; };
 		C3F5E1C82C2B9FE6004DD66D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F5E1C72C2B9FE6004DD66D /* ContentView.swift */; };
 		C3F5E1CC2C2B9FE7004DD66D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C3F5E1CB2C2B9FE7004DD66D /* Assets.xcassets */; };
@@ -37,8 +38,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C36A04EF2C336D5B00AEBE3D /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		C39D79922C2BA26D00D55E65 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
-		C39D79942C2BA29200D55E65 /* ProxySetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxySetting.swift; sourceTree = "<group>"; };
+		C39D79942C2BA29200D55E65 /* SystemNetworkSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemNetworkSettings.swift; sourceTree = "<group>"; };
 		C3F5E1C22C2B9FE6004DD66D /* ProxySwitchForMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ProxySwitchForMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3F5E1C52C2B9FE6004DD66D /* ProxySwitchForMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxySwitchForMacApp.swift; sourceTree = "<group>"; };
 		C3F5E1C72C2B9FE6004DD66D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -102,9 +104,10 @@
 			isa = PBXGroup;
 			children = (
 				C3F5E1C52C2B9FE6004DD66D /* ProxySwitchForMacApp.swift */,
+				C36A04EF2C336D5B00AEBE3D /* Localizable.xcstrings */,
 				C3F5E1C72C2B9FE6004DD66D /* ContentView.swift */,
 				C39D79922C2BA26D00D55E65 /* MenuBarView.swift */,
-				C39D79942C2BA29200D55E65 /* ProxySetting.swift */,
+				C39D79942C2BA29200D55E65 /* SystemNetworkSettings.swift */,
 				C3F5E1CB2C2B9FE7004DD66D /* Assets.xcassets */,
 				C3F5E1D02C2B9FE7004DD66D /* ProxySwitchForMac.entitlements */,
 				C3F5E1CD2C2B9FE7004DD66D /* Preview Content */,
@@ -221,11 +224,12 @@
 			};
 			buildConfigurationList = C3F5E1BD2C2B9FE6004DD66D /* Build configuration list for PBXProject "ProxySwitchForMac" */;
 			compatibilityVersion = "Xcode 15.0";
-			developmentRegion = en;
+			developmentRegion = "zh-Hans";
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hans",
 			);
 			mainGroup = C3F5E1B92C2B9FE6004DD66D;
 			packageReferences = (
@@ -248,6 +252,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C3F5E1CF2C2B9FE7004DD66D /* Preview Assets.xcassets in Resources */,
+				C36A04F02C336D5B00AEBE3D /* Localizable.xcstrings in Resources */,
 				C3F5E1CC2C2B9FE7004DD66D /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -274,7 +279,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C3F5E1C82C2B9FE6004DD66D /* ContentView.swift in Sources */,
-				C39D79952C2BA29200D55E65 /* ProxySetting.swift in Sources */,
+				C39D79952C2BA29200D55E65 /* SystemNetworkSettings.swift in Sources */,
 				C39D79932C2BA26D00D55E65 /* MenuBarView.swift in Sources */,
 				C3F5E1C62C2B9FE6004DD66D /* ProxySwitchForMacApp.swift in Sources */,
 			);
@@ -372,6 +377,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -428,6 +434,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Release;
 		};
