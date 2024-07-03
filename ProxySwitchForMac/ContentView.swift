@@ -19,11 +19,29 @@ struct ContentView: View {
         HStack {
             Form {
                 Section {
-                    TextField("Proxy Server", text: $appState.proxySettings.Server)
-                    //                    .textFieldStyle(RoundedBorderTextFieldStyle()) // 使用带有圆角边框的样式
-                    
-                    TextField("Port", text: $appState.proxySettings.Port)
-                    //                    .textFieldStyle(RoundedBorderTextFieldStyle()) // 使用带有圆角边框的样式
+//                    TextField("Proxy Server", text: $appState.proxySettings.Server)
+//                    //                    .textFieldStyle(RoundedBorderTextFieldStyle()) // 使用带有圆角边框的样式
+//                    
+//                    TextField("Port", text: $appState.proxySettings.Port)
+//                    //                    .textFieldStyle(RoundedBorderTextFieldStyle()) // 使用带有圆角边框的样式
+                    HStack {
+                        Text("Proxy server")
+                        
+                        Spacer()
+                        
+                        Button(appState.proxySettings.Server) {
+                            copyToClipboard(text: appState.proxySettings.Server)
+                        }
+                        .help("Click to copy")
+
+                        Text(":")
+                            .fontWeight(.bold)
+                        
+                        Button(appState.proxySettings.Port) {
+                            copyToClipboard(text: appState.proxySettings.Port)
+                        }
+                        .help("Click to copy")
+                    }
                     
                     Toggle(isOn: $appState.proxySettings.isOn){
                         Text("Status")
@@ -49,3 +67,9 @@ struct ContentView: View {
 //enum test: Int, Hashable, CaseIterable, Identifiable, Codable {
 //
 //}
+
+func copyToClipboard(text: String) {
+    let pasteBoard = NSPasteboard.general
+    pasteBoard.clearContents()
+    pasteBoard.setString(text, forType: .string)
+}

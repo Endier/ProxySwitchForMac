@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "zh-Hans",
   "strings" : {
+    ":" : {
+      "shouldTranslate" : false
+    },
     "AppName" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -14,6 +17,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ProxySwitch"
+          }
+        }
+      }
+    },
+    "Click to copy" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click to copy"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点击以粘贴"
           }
         }
       }
@@ -35,28 +54,12 @@
         }
       }
     },
-    "Port" : {
+    "Proxy server" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Port"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "端口"
-          }
-        }
-      }
-    },
-    "Proxy Server" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Proxy Server"
+            "value" : "Proxy server"
           }
         },
         "zh-Hans" : {
