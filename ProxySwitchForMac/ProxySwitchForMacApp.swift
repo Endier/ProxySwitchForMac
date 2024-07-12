@@ -48,9 +48,9 @@ struct ProxySwitchForMacApp: App {
 //            return WindowPlacement(size: size)
 //        }
 
-        Settings {
+//        Settings {
 //            SettingsView()
-        }
+//        }
         
         MenuBarExtra {
             MenuBarView(appState: appState)
