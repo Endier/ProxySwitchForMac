@@ -30,7 +30,7 @@ struct ProxySwitchForMacApp: App {
             if #available(macOS 15.0, *) {
                 ContentView(appState: appState)
                     .fixedSize() // 强制内容视图保持固定大小
-                    .containerBackground(.regularMaterial, for: .window) // 窗口材质
+                    .containerBackground(.thinMaterial, for: .window) // 窗口材质
             } else {
                 // Fallback on earlier versions
                 ContentView(appState: appState)
