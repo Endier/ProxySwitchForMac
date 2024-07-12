@@ -10,7 +10,10 @@
 
 并且配有菜单栏图标显示当前开关状态：
 
+关闭：
 ![network](https://github.com/user-attachments/assets/5d6a2898-1aa3-4365-b5bb-3b7ce9e792bb)
+
+开启：
 ![network badge shield half filled](https://github.com/user-attachments/assets/b7ff4dab-73d4-4d09-922e-5516d8b55696)
 
 它会切换系统设置中的如下开关:
