@@ -38,7 +38,10 @@ public func getSystemNetworkServiceNames() -> [String] {
 //        serviceNames = serviceNames.filter { !$0.hasPrefix("*") || $0.trimmingCharacters(in: .whitespaces).isEmpty }
     }
         
+#if DEBUG
     print(serviceNames)
+#endif
+    
     return serviceNames
 }
 

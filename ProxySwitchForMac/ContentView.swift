@@ -21,9 +21,6 @@ struct ContentView: View {
                 Section {
 //                    TextField("Proxy Server", text: $appState.proxySettings.Server)
 //                    //                    .textFieldStyle(RoundedBorderTextFieldStyle()) // 使用带有圆角边框的样式
-//                    
-//                    TextField("Port", text: $appState.proxySettings.Port)
-//                    //                    .textFieldStyle(RoundedBorderTextFieldStyle()) // 使用带有圆角边框的样式
                     HStack {
                         Text("Proxy server")
                         
