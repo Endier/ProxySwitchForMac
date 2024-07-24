@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C32CC5F62C4E3F4D00E75150 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = C32CC5F52C4E3F4D00E75150 /* Sparkle */; };
+		C3491EC02C50CF33007663C8 /* Notification.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3491EBF2C50CF33007663C8 /* Notification.swift */; };
 		C36A04F02C336D5B00AEBE3D /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C36A04EF2C336D5B00AEBE3D /* Localizable.xcstrings */; };
 		C39D79932C2BA26D00D55E65 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C39D79922C2BA26D00D55E65 /* MenuBarView.swift */; };
 		C39D79952C2BA29200D55E65 /* SystemNetworkSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = C39D79942C2BA29200D55E65 /* SystemNetworkSettings.swift */; };
@@ -38,6 +40,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C3491EBF2C50CF33007663C8 /* Notification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notification.swift; sourceTree = "<group>"; };
+		C3491EC12C50D2A8007663C8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		C36A04EF2C336D5B00AEBE3D /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		C39D79922C2BA26D00D55E65 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
 		C39D79942C2BA29200D55E65 /* SystemNetworkSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemNetworkSettings.swift; sourceTree = "<group>"; };
@@ -60,6 +64,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C3F5E1F42C2BA0D3004DD66D /* KeyboardShortcuts in Frameworks */,
+				C32CC5F62C4E3F4D00E75150 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -103,11 +108,13 @@
 		C3F5E1C42C2B9FE6004DD66D /* ProxySwitchForMac */ = {
 			isa = PBXGroup;
 			children = (
+				C3491EC12C50D2A8007663C8 /* Info.plist */,
 				C3F5E1C52C2B9FE6004DD66D /* ProxySwitchForMacApp.swift */,
 				C36A04EF2C336D5B00AEBE3D /* Localizable.xcstrings */,
 				C3F5E1C72C2B9FE6004DD66D /* ContentView.swift */,
 				C39D79922C2BA26D00D55E65 /* MenuBarView.swift */,
 				C39D79942C2BA29200D55E65 /* SystemNetworkSettings.swift */,
+				C3491EBF2C50CF33007663C8 /* Notification.swift */,
 				C3F5E1CB2C2B9FE7004DD66D /* Assets.xcassets */,
 				C3F5E1D02C2B9FE7004DD66D /* ProxySwitchForMac.entitlements */,
 				C3F5E1CD2C2B9FE7004DD66D /* Preview Content */,
@@ -158,6 +165,7 @@
 			name = ProxySwitchForMac;
 			packageProductDependencies = (
 				C3F5E1F32C2BA0D3004DD66D /* KeyboardShortcuts */,
+				C32CC5F52C4E3F4D00E75150 /* Sparkle */,
 			);
 			productName = ProxySwitchForMac;
 			productReference = C3F5E1C22C2B9FE6004DD66D /* ProxySwitchForMac.app */;
@@ -224,7 +232,7 @@
 			};
 			buildConfigurationList = C3F5E1BD2C2B9FE6004DD66D /* Build configuration list for PBXProject "ProxySwitchForMac" */;
 			compatibilityVersion = "Xcode 15.0";
-			developmentRegion = "zh-Hans";
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
@@ -234,6 +242,7 @@
 			mainGroup = C3F5E1B92C2B9FE6004DD66D;
 			packageReferences = (
 				C3F5E1F22C2BA050004DD66D /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
+				C32CC5F42C4E3F4D00E75150 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			productRefGroup = C3F5E1C32C2B9FE6004DD66D /* Products */;
 			projectDirPath = "";
@@ -279,6 +288,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C3F5E1C82C2B9FE6004DD66D /* ContentView.swift in Sources */,
+				C3491EC02C50CF33007663C8 /* Notification.swift in Sources */,
 				C39D79952C2BA29200D55E65 /* SystemNetworkSettings.swift in Sources */,
 				C39D79932C2BA26D00D55E65 /* MenuBarView.swift in Sources */,
 				C3F5E1C62C2B9FE6004DD66D /* ProxySwitchForMacApp.swift in Sources */,
@@ -444,6 +454,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ProxySwitchForMac/ProxySwitchForMac.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -452,6 +463,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ProxySwitchForMac/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -472,6 +484,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ProxySwitchForMac/ProxySwitchForMac.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -480,6 +493,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ProxySwitchForMac/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -604,6 +618,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		C32CC5F42C4E3F4D00E75150 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.4;
+			};
+		};
 		C3F5E1F22C2BA050004DD66D /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
@@ -615,6 +637,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		C32CC5F52C4E3F4D00E75150 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C32CC5F42C4E3F4D00E75150 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
 		C3F5E1F32C2BA0D3004DD66D /* KeyboardShortcuts */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = C3F5E1F22C2BA050004DD66D /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
