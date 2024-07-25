@@ -33,11 +33,6 @@ struct ProxySwitchForMacApp: App {
         //        }
         //        .windowToolbarStyle(UnifiedWindowToolbarStyle())
         //        .handlesExternalEvents(matching: Set(arrayLiteral: "*"))
-//        WindowGroup {
-//            
-//        }
-        
-        
 
         Window("AppName", id: "mainwindow") {
             if #available(macOS 15.0, *) {
@@ -47,7 +42,6 @@ struct ProxySwitchForMacApp: App {
             } else {
                 // Fallback on earlier versions
                 ContentView(appState: appState)
-                    .frame(minWidth:500, idealWidth: 500, minHeight: 180, idealHeight: 180)
                     .fixedSize() // 强制内容视图保持固定大小
             }
         }
