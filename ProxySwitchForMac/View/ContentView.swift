@@ -5,53 +5,60 @@
 //  Created by Cody on 2024/6/11.
 //
 
-import SwiftUI
-import SwiftData
 import AppKit
 import Carbon
 import KeyboardShortcuts
+import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var appState: AppState
-    
+
+    @Environment(\.modelContext) private var modelContext
+
     var body: some View {
-        
+
         HStack {
             Form {
                 Section {
-//                    TextField("Proxy Server", text: $appState.proxySettings.Server)
-//                    //                    .textFieldStyle(RoundedBorderTextFieldStyle()) // 使用带有圆角边框的样式
+                    //                    TextField(
+                    //                        "Proxy Server", text: $appState.proxySettings.Server
+                    //                    )
+                    // 使用带有圆角边框的样式
+                    //                    .textFieldStyle(RoundedBorderTextFieldStyle())
                     HStack {
                         Text("Proxy server")
-                        
+
                         Spacer()
-                        
-                        Button(appState.proxySettings.Server) {
-                            copyToClipboard(text: appState.proxySettings.Server)
+
+                        Button(appState.proxySettingList[0].Server) {
+                            copyToClipboard(text: appState.proxySettingList[0].Server)
                         }
                         .help("Click to copy")
 
                         Text(":")
                             .fontWeight(.bold)
-                        
-                        Button(appState.proxySettings.Port) {
-                            copyToClipboard(text: appState.proxySettings.Port)
+
+                        Button(appState.proxySettingList[0].Port) {
+                            copyToClipboard(text: appState.proxySettingList[0].Port)
                         }
                         .help("Click to copy")
                     }
-                    
-                    Toggle(isOn: $appState.proxySettings.isOn){
+
+                    Toggle(isOn: $appState.isOn) {
                         Text("Status")
                     }
-                    .onChange(of: appState.proxySettings.isOn) {
-                        let serviceNames: [String] = getSystemNetworkServiceNames()
-                        let _ = setProxyEnable(serviceNames: serviceNames, bool: appState.proxySettings.isOn)
+                    .onChange(of: appState.isOn) {
+                        let serviceNames: [String] = ["Wi-Fi", "Ethernet"]
+                        let _ = setProxyEnable(
+                            serviceNames: serviceNames,
+                            bool: appState.isOn)
                     }
-                    
-                    KeyboardShortcuts.Recorder("Customize global shortcut", name: .proxySwitch)
+
+                    KeyboardShortcuts.Recorder(
+                        "Customize global shortcut", name: .proxySwitch)
                 }
             }
-            .formStyle(.grouped) // Form的这种格式类似于系统设置的选项卡风格
+            .formStyle(.grouped)  // Form的这种格式类似于系统设置的选项卡风格
         }
     }
 }

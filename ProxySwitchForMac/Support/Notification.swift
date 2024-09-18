@@ -17,11 +17,10 @@ public func requestNotificationPermission(center: UNUserNotificationCenter) asyn
     return center
 }
 
-public func sentNotifications(center: UNUserNotificationCenter, proxySettings: ProxySettings) async {
-    
+public func sentNotifications(center: UNUserNotificationCenter, isOn: Bool) async {
     let content = UNMutableNotificationContent()
     content.title = "Proxy Switch"
-    if proxySettings.isOn {
+    if isOn {
         content.body =  NSLocalizedString("Your network proxy has been turned ON.", comment: "")
     } else {
         content.body = NSLocalizedString("Your network proxy has been turned OFF.", comment: "")

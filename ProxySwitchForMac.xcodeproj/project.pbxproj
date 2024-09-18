@@ -3,17 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		C32CC5F62C4E3F4D00E75150 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = C32CC5F52C4E3F4D00E75150 /* Sparkle */; };
-		C3491EC02C50CF33007663C8 /* Notification.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3491EBF2C50CF33007663C8 /* Notification.swift */; };
 		C36A04F02C336D5B00AEBE3D /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C36A04EF2C336D5B00AEBE3D /* Localizable.xcstrings */; };
-		C39D79932C2BA26D00D55E65 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C39D79922C2BA26D00D55E65 /* MenuBarView.swift */; };
-		C39D79952C2BA29200D55E65 /* SystemNetworkSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = C39D79942C2BA29200D55E65 /* SystemNetworkSettings.swift */; };
 		C3F5E1C62C2B9FE6004DD66D /* ProxySwitchForMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F5E1C52C2B9FE6004DD66D /* ProxySwitchForMacApp.swift */; };
-		C3F5E1C82C2B9FE6004DD66D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F5E1C72C2B9FE6004DD66D /* ContentView.swift */; };
 		C3F5E1CC2C2B9FE7004DD66D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C3F5E1CB2C2B9FE7004DD66D /* Assets.xcassets */; };
 		C3F5E1CF2C2B9FE7004DD66D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C3F5E1CE2C2B9FE7004DD66D /* Preview Assets.xcassets */; };
 		C3F5E1DA2C2B9FE8004DD66D /* ProxySwitchForMacTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F5E1D92C2B9FE8004DD66D /* ProxySwitchForMacTests.swift */; };
@@ -40,14 +36,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		C3491EBF2C50CF33007663C8 /* Notification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notification.swift; sourceTree = "<group>"; };
 		C3491EC12C50D2A8007663C8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		C36A04EF2C336D5B00AEBE3D /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
-		C39D79922C2BA26D00D55E65 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
-		C39D79942C2BA29200D55E65 /* SystemNetworkSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemNetworkSettings.swift; sourceTree = "<group>"; };
 		C3F5E1C22C2B9FE6004DD66D /* ProxySwitchForMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ProxySwitchForMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3F5E1C52C2B9FE6004DD66D /* ProxySwitchForMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxySwitchForMacApp.swift; sourceTree = "<group>"; };
-		C3F5E1C72C2B9FE6004DD66D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		C3F5E1CB2C2B9FE7004DD66D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C3F5E1CE2C2B9FE7004DD66D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		C3F5E1D02C2B9FE7004DD66D /* ProxySwitchForMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ProxySwitchForMac.entitlements; sourceTree = "<group>"; };
@@ -57,6 +49,11 @@
 		C3F5E1E32C2B9FE8004DD66D /* ProxySwitchForMacUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxySwitchForMacUITests.swift; sourceTree = "<group>"; };
 		C3F5E1E52C2B9FE8004DD66D /* ProxySwitchForMacUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxySwitchForMacUITestsLaunchTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		C37A74C02C981F8900336BF1 /* Support */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Support; sourceTree = "<group>"; };
+		C37A74C12C981F9700336BF1 /* View */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = View; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		C3F5E1BF2C2B9FE6004DD66D /* Frameworks */ = {
@@ -111,10 +108,8 @@
 				C3491EC12C50D2A8007663C8 /* Info.plist */,
 				C3F5E1C52C2B9FE6004DD66D /* ProxySwitchForMacApp.swift */,
 				C36A04EF2C336D5B00AEBE3D /* Localizable.xcstrings */,
-				C3F5E1C72C2B9FE6004DD66D /* ContentView.swift */,
-				C39D79922C2BA26D00D55E65 /* MenuBarView.swift */,
-				C39D79942C2BA29200D55E65 /* SystemNetworkSettings.swift */,
-				C3491EBF2C50CF33007663C8 /* Notification.swift */,
+				C37A74C12C981F9700336BF1 /* View */,
+				C37A74C02C981F8900336BF1 /* Support */,
 				C3F5E1CB2C2B9FE7004DD66D /* Assets.xcassets */,
 				C3F5E1D02C2B9FE7004DD66D /* ProxySwitchForMac.entitlements */,
 				C3F5E1CD2C2B9FE7004DD66D /* Preview Content */,
@@ -161,6 +156,10 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				C37A74C02C981F8900336BF1 /* Support */,
+				C37A74C12C981F9700336BF1 /* View */,
 			);
 			name = ProxySwitchForMac;
 			packageProductDependencies = (
@@ -287,10 +286,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C3F5E1C82C2B9FE6004DD66D /* ContentView.swift in Sources */,
-				C3491EC02C50CF33007663C8 /* Notification.swift in Sources */,
-				C39D79952C2BA29200D55E65 /* SystemNetworkSettings.swift in Sources */,
-				C39D79932C2BA26D00D55E65 /* MenuBarView.swift in Sources */,
 				C3F5E1C62C2B9FE6004DD66D /* ProxySwitchForMacApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -465,6 +460,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ProxySwitchForMac/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ProxySwitch;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -476,7 +472,9 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 5.0;
+				_EXPERIMENTAL_SWIFT_EXPLICIT_MODULES = YES;
 			};
 			name = Debug;
 		};
@@ -497,6 +495,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ProxySwitchForMac/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ProxySwitch;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -508,7 +507,9 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 5.0;
+				_EXPERIMENTAL_SWIFT_EXPLICIT_MODULES = YES;
 			};
 			name = Release;
 		};
@@ -555,6 +556,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = SS3RKYSWZB;
 				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.singularity.ProxySwitchForMacUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -571,6 +573,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = SS3RKYSWZB;
 				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.singularity.ProxySwitchForMacUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";

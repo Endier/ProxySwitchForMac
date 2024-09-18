@@ -5,10 +5,10 @@
 //
 
 import SwiftUI
-import SwiftData
 import KeyboardShortcuts
 import Sparkle
 import UserNotifications
+import SwiftData
 
 @main
 struct ProxySwitchForMacApp: App {
@@ -16,11 +16,23 @@ struct ProxySwitchForMacApp: App {
     // 一种属性包装器类型，用于订阅可观察对象，并在可观察对象发生变化时使视图失效。
     @ObservedObject var appState = AppState()
     
-    private let updaterController: SPUStandardUpdaterController
+//    var sharedModelContainer: ModelContainer = {
+//        let schema = Schema([ProxySettings.self])
+//        
+//        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+//        
+//        do {
+//            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+//        } catch {
+//            fatalError("Could not create ModelContainer: \(error)")
+//        }
+//    }()
     
-    init() {
-        updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
-    }
+//    private let updaterController: SPUStandardUpdaterController
+    
+//    init() {
+//        updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+//    }
     
     var body: some Scene {
         // WindowGroup可以打开多个窗口，适用于多窗口应用
@@ -53,11 +65,12 @@ struct ProxySwitchForMacApp: App {
 //            let displayBounds = context.defaultDisplay.visibleRect
 //            size = zoomToFit(ideal: size, bounds: displayBounds)
 //            return WindowPlacement(size: size)
-        .commands() {
-            CommandGroup(after: .appInfo) {
-                CheckForUpdateView(updater: updaterController.updater)
-            }
-        }
+//        .commands() {
+//            CommandGroup(after: .appInfo) {
+//                CheckForUpdateView(updater: updaterController.updater)
+//            }
+//        }
+//        .modelContainer(sharedModelContainer)
 
 //        Settings {
 //            SettingsView()
@@ -66,12 +79,13 @@ struct ProxySwitchForMacApp: App {
         MenuBarExtra {
             MenuBarView(appState: appState)
         } label: {
-            if appState.proxySettings.isOn {
+            if appState.isOn {
                 Image("MenuBarIcon")
             } else {
                 Image(systemName: "network")
             }
         }
+//        .modelContainer(sharedModelContainer)
     }
 }
 
@@ -82,48 +96,49 @@ extension KeyboardShortcuts.Name {
 
 // 创建全局对象和其属性
 class AppState: ObservableObject {
-    @Published var proxySettings: ProxySettings = getProxySettings(serviceNames: getSystemNetworkServiceNames())
-    @Published var center = UNUserNotificationCenter.current()
+    @Published var proxySettingList = getProxySettings(serviceNames: ["Wi-Fi", "Ethernet"])
+    @Published var isOn: Bool = isProxyOn(proxySettingList: getProxySettings(serviceNames: ["Wi-Fi", "Ethernet"]))
     // 设置自定义全局快捷键逻辑
     init() {
         KeyboardShortcuts.onKeyUp(for: .proxySwitch) { [self] in
-            proxySettings.isOn.toggle()
+            isOn.toggle()
             Task {
-                let center = await requestNotificationPermission(center: center)
-                await sentNotifications(center: center, proxySettings: proxySettings)
+                var center = UNUserNotificationCenter.current()
+                center = await requestNotificationPermission(center: center)
+                await sentNotifications(center: center, isOn: isOn)
             }
         }
     }
 }
 
 // This view model class publishes when new updates can be checked by the user
-final class CheckForUpdatesViewModel: ObservableObject {
-    @Published var canCheckForUpdates = false
-    
-    init(updater: SPUUpdater) {
-        updater.publisher(for: \.canCheckForUpdates)
-            .assign(to: &$canCheckForUpdates)
-    }
-}
+//final class CheckForUpdatesViewModel: ObservableObject {
+//    @Published var canCheckForUpdates = false
+//    
+//    init(updater: SPUUpdater) {
+//        updater.publisher(for: \.canCheckForUpdates)
+//            .assign(to: &$canCheckForUpdates)
+//    }
+//}
 
 // This is the view for the Check for Updates menu item
 // Note this intermediate view is necessary for the disabled state on the menu item to work properly before Monterey.
 // See https://stackoverflow.com/questions/68553092/menu-not-updating-swiftui-bug for more info
-struct CheckForUpdateView: View {
-    @ObservedObject private var checkForUpdatesViewModel: CheckForUpdatesViewModel
-    private let updater: SPUUpdater
-    
-    init(updater: SPUUpdater) {
-        self.updater = updater
-        
-        self.checkForUpdatesViewModel = CheckForUpdatesViewModel(updater: updater)
-    }
-    
-    var body: some View {
-        Button("Check for Updates...", action: updater.checkForUpdates)
-            .disabled(!checkForUpdatesViewModel.canCheckForUpdates)
-    }
-}
+//struct CheckForUpdateView: View {
+//    @ObservedObject private var checkForUpdatesViewModel: CheckForUpdatesViewModel
+//    private let updater: SPUUpdater
+//    
+//    init(updater: SPUUpdater) {
+//        self.updater = updater
+//        
+//        self.checkForUpdatesViewModel = CheckForUpdatesViewModel(updater: updater)
+//    }
+//    
+//    var body: some View {
+//        Button("Check for Updates...", action: updater.checkForUpdates)
+//            .disabled(!checkForUpdatesViewModel.canCheckForUpdates)
+//    }
+//}
 
 
 
