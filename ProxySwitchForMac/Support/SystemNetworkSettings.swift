@@ -1,27 +1,87 @@
+import CFNetwork
 import Foundation
-import SwiftData
+import UserNotifications
+import KeyboardShortcuts
 
 let url = URL(fileURLWithPath: "/usr/sbin/networksetup")
 
-public class ProxySetting {
-    public var Enabled: Bool
+@Observable
+class SystemProxyStatus {
+    var _totleEnable: Bool
+    
+    var totelEnable: Bool {
+        get {
+//            if WiFiProxySetting?.Enable == "No" && EthernetProxySetting?.Enable == "No" {
+//                return false
+//            }
+            return _totleEnable
+        }
+
+        set {
+            let serviceNames = ["Wi-Fi", "Ethernet"]
+            defaultToggleEnable(serviceNames: serviceNames, bool: newValue)
+            _totleEnable = newValue
+
+            // 发送通知
+            Task {
+                var center = UNUserNotificationCenter.current()
+                center = await requestNotificationPermission(center: center)
+                await sentNotifications(center: center, isOn: newValue)
+            }
+        }
+    }
+    
+    init() {
+        let networkServices = getSystemNetworkServiceNames()
+        var result: ProxySetting?
+        var result1: ProxySetting?
+        var result2: ProxySetting?
+        var result3: ProxySetting?
+        var result4: ProxySetting?
+        var result5: ProxySetting?
+
+        if networkServices.contains("Wi-Fi") {
+            result = getProxySetting(argument: "-getwebproxy", serviceName: "Wi-Fi")
+            result1 = getProxySetting(argument: "-getsecurewebproxy", serviceName: "Wi-Fi")
+            result2 = getProxySetting(argument: "-getsocksfirewallproxy", serviceName: "Wi-Fi")
+        }
+
+        if networkServices.contains("Ethernet") {
+            result3 = getProxySetting(argument: "-getwebproxy", serviceName: "Ethernet")
+            result4 = getProxySetting(argument: "-getsecurewebproxy", serviceName: "Ethernet")
+            result5 = getProxySetting(argument: "-getsocksfirewallproxy", serviceName: "Ethernet")
+        }
+
+        if result?.Enable == "No" && result1?.Enable == "No" && result2?.Enable == "No" && result3?.Enable == "No" && result4?.Enable == "No" && result5?.Enable == "No" {
+            self._totleEnable = false
+        } else {
+            self._totleEnable = true
+        }
+        
+        KeyboardShortcuts.onKeyDown(for: .proxySwitch) { [self] in
+            totelEnable.toggle()
+        }
+    }
+}
+
+// 命名并设置默认快捷键
+extension KeyboardShortcuts.Name {
+    static let proxySwitch = Self("proxySwitch", default: .init(.j, modifiers: .command))
+}
+
+class ProxySetting {
+    public var Enable: String
     public var Server: String
     public var Port: String
 
-    init() {
-        self.Enabled = false
-        self.Server = "No information"
-        self.Port = "No information"
-    }
-
-    init(Enable: Bool, Server: String, Port: String) {
-        self.Enabled = Enable
+    init(Enable: String, Server: String, Port: String) {
+        self.Enable = Enable
         self.Server = Server
         self.Port = Port
     }
 }
 
-public func getSystemNetworkServiceNames() -> [String] {
+func getSystemNetworkServiceNames() -> [String] {
     var serviceNames: [String] = []
     // 先创建子线程
     let checkProcess = Process()
@@ -68,7 +128,50 @@ public func getSystemNetworkServiceNames() -> [String] {
     return serviceNames
 }
 
-public func getProxySettings(serviceNames: [String]) -> [ProxySetting] {
+func getProxySetting(argument: String, serviceName: String) -> ProxySetting? {
+    // 先创建子线程
+    let checkProcess = Process()
+    checkProcess.executableURL = url
+    checkProcess.arguments = [argument, serviceName]
+
+    // Pipe就是类似于channel的东西，用于在不同的进程间传递数据
+    // 这里获取开关状态的命令是在子进程执行的，需要把结果传回主进程
+    let pipe = Pipe()
+    checkProcess.standardOutput = pipe
+    guard let _ = try? checkProcess.run() else {
+        fatalError()
+    }
+
+    checkProcess.waitUntilExit()
+
+    guard let data = try? pipe.fileHandleForReading.readToEnd() else {
+        fatalError("Get system status failed!")
+    }
+
+    guard let status = String(data: data, encoding: .utf8) else {
+        fatalError()
+    }
+
+    let errorMessage = "** Error: Unable to find item in network database."
+
+    if status != errorMessage {
+        let hashmap = stringToHashMap(string: status)
+        let enabled = hashmap["Enabled"] ?? ""
+        let server = hashmap["Server"] ?? ""
+        let port = hashmap["Port"] ?? ""
+        let proxySetting = ProxySetting(
+            Enable: enabled,
+            Server: server,
+            Port: port
+        )
+
+        return proxySetting
+    }
+
+    return nil
+}
+
+func getProxySettings(serviceNames: [String]) -> [ProxySetting] {
     var proxySettingList: [ProxySetting] = []
 
     let arguments = [
@@ -77,53 +180,10 @@ public func getProxySettings(serviceNames: [String]) -> [ProxySetting] {
 
     for argument in arguments {
         for serviceName in serviceNames {
-            // 先创建子线程
-            let checkProcess = Process()
-            // 在子线程中执行命令
-            checkProcess.executableURL = url
-            // 命令有两个参数
-            // 第一个参数有三种，分别对应的是获取http代理、https代理、SOCKS代理的状态
-            // 第二个参数是网络服务的名称,如 "Wi-Fi" 或 "Ethernet"
-            checkProcess.arguments = [argument, serviceName]
-            // Pipe就是类似于channel的东西，用于在不同的进程间传递数据
-            // 这里获取开关状态的命令是在子进程执行的，需要把结果传回主进程
-            let pipe = Pipe()
-            checkProcess.standardOutput = pipe
-
-            do {
-                try checkProcess.run()
-            } catch {
-                print("Process run error!")
+            let proxySetting = getProxySetting(argument: argument, serviceName: serviceName)
+            if proxySetting != nil {
+                proxySettingList.append(proxySetting!)
             }
-
-            checkProcess.waitUntilExit()
-
-            var data: Data?
-
-            do {
-                data = try pipe.fileHandleForReading.readToEnd()
-                let jsonString = String(data: data!, encoding: .utf8)
-                if jsonString
-                    != "** Error: Unable to find item in network database."
-                {
-                    let hashmap = stringToHashMap(string: jsonString!)
-                    let enabled = hashmap["Enabled"] == "Yes" ? true : false
-                    let server = hashmap["Server"] ?? ""
-                    let port = hashmap["Port"] ?? ""
-                    let proxySetting = ProxySetting(
-                        Enable: enabled,
-                        Server: server,
-                        Port: port
-                    )
-
-                    proxySettingList.append(proxySetting)
-                }
-            } catch {
-                print(error)
-                print("Read file failed or Decode data filed!")
-            }
-            
-            
         }
     }
 
@@ -131,43 +191,46 @@ public func getProxySettings(serviceNames: [String]) -> [ProxySetting] {
 }
 
 /// 将所有网络服务名输入，逐个获取每个开关的状态，如果有一个关了就返回false，全开才返回true
-func isProxyOn(proxySettingList: [ProxySetting]) -> Bool {
-    var isProxyOn = false
+func isSwitchOn(proxySettingList: [ProxySetting]) -> Bool {
+    var num = 0
     for proxySetting in proxySettingList {
-        isProxyOn = proxySetting.Enabled
+        if proxySetting.Enable == "Yes" {
+            num += 1
+        }
     }
-    return isProxyOn
+    if num == 0 {
+        return false
+    } else {
+        return true
+    }
+ }
+
+func toggleEnable(argument: String, serviceName: String, enable: String) {
+    let process = Process()
+    process.executableURL = url
+    process.arguments = [argument, serviceName, enable]
+    guard let _ = try? process.run() else {
+        fatalError()
+    }
 }
 
 /// 开关代理不需要很精细，全关或全开即可
-public func setProxyEnable(serviceNames: [String], bool: Bool) -> Bool {
+public func defaultToggleEnable(serviceNames: [String], bool: Bool) {
     // 在子线程中执行命令
     // 分别是http代理、https代理、SOCKS代理
     let arguments = [
         "-setwebproxystate", "-setsecurewebproxystate",
         "-setsocksfirewallproxystate",
     ]
-    //最后的变量，填写网络络服务的名称，如 "Wi-Fi" 或 "Ethernet"
-    // TODO 网络服务的名字会变化的，需要使用方法获取
+    // 最后的变量，填写网络络服务的名称，如 "Wi-Fi" 或 "Ethernet"
 
     let onOrOff: String = bool ? "on" : "off"
 
     for serviceName in serviceNames {
         for argument in arguments {
-            // 先创建子线程
-            let process = Process()
-            process.executableURL = url
-            process.arguments = [argument, serviceName, onOrOff]
-            do {
-                try process.run()
-            } catch {
-                print("Process run error!")
-                return false
-            }
+            toggleEnable(argument: argument, serviceName: serviceName, enable: onOrOff)
         }
     }
-
-    return true
 }
 
 func stringToHashMap(string: String) -> [String: String] {

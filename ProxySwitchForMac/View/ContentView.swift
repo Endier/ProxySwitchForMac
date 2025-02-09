@@ -11,46 +11,38 @@ import KeyboardShortcuts
 import SwiftUI
 
 struct ContentView: View {
-    @ObservedObject var appState: AppState
-
-    @Environment(\.modelContext) private var modelContext
+//    @EnvironmentObject var appState: AppState
+    @Bindable var appState: SystemProxyStatus
 
     var body: some View {
         HStack {
             Form {
                 Section {
-                    //                    TextField(
-                    //                        "Proxy Server", text: $appState.proxySettings.Server
-                    //                    )
-                    // 使用带有圆角边框的样式
-                    //                    .textFieldStyle(RoundedBorderTextFieldStyle())
+//                    TextField(
+//                        "Proxy Server", text: $appState.proxySettings.Server
+//                    )
+//                    .textFieldStyle(RoundedBorderTextFieldStyle() // 使用带有圆角边框的样式
                     HStack {
                         Text("Proxy server")
 
                         Spacer()
 
-                        Button(appState.proxySettingList[0].Server) {
-                            copyToClipboard(text: appState.proxySettingList[0].Server)
-                        }
-                        .help("Click to copy")
+//                        Button(appState.proxySettingList[0].Server) {
+//                            copyToClipboard(text: appState.proxySettingList[0].Server)
+//                        }
+//                        .help("Click to copy")
 
-                        Text(":")
-                            .fontWeight(.bold)
+//                        Text(":")
+//                            .fontWeight(.bold)
 
-                        Button(appState.proxySettingList[0].Port) {
-                            copyToClipboard(text: appState.proxySettingList[0].Port)
-                        }
-                        .help("Click to copy")
+//                        Button(appState.proxySettingList[0].Port) {
+//                            copyToClipboard(text: appState.proxySettingList[0].Port)
+//                        }
+//                        .help("Click to copy")
                     }
 
-                    Toggle(isOn: $appState.isOn) {
+                    Toggle(isOn: $appState.totelEnable) {
                         Text("Status")
-                    }
-                    .onChange(of: appState.isOn) {
-                        let serviceNames: [String] = ["Wi-Fi", "Ethernet"]
-                        _ = setProxyEnable(
-                            serviceNames: serviceNames,
-                            bool: appState.isOn)
                     }
 
                     KeyboardShortcuts.Recorder(

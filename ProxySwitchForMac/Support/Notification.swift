@@ -8,7 +8,7 @@
 import Foundation
 import UserNotifications
 
-public func requestNotificationPermission(center: UNUserNotificationCenter) async -> UNUserNotificationCenter {
+func requestNotificationPermission(center: UNUserNotificationCenter) async -> UNUserNotificationCenter {
     do {
         try await center.requestAuthorization(options: [.alert, .sound])
     } catch {
@@ -17,7 +17,7 @@ public func requestNotificationPermission(center: UNUserNotificationCenter) asyn
     return center
 }
 
-public func sentNotifications(center: UNUserNotificationCenter, isOn: Bool) async {
+func sentNotifications(center: UNUserNotificationCenter, isOn: Bool) async {
     let content = UNMutableNotificationContent()
     content.title = "Proxy Switch"
     if isOn {

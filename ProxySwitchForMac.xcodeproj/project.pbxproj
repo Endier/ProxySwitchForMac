@@ -12,9 +12,6 @@
 		C3F5E1C62C2B9FE6004DD66D /* ProxySwitchForMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F5E1C52C2B9FE6004DD66D /* ProxySwitchForMacApp.swift */; };
 		C3F5E1CC2C2B9FE7004DD66D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C3F5E1CB2C2B9FE7004DD66D /* Assets.xcassets */; };
 		C3F5E1CF2C2B9FE7004DD66D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C3F5E1CE2C2B9FE7004DD66D /* Preview Assets.xcassets */; };
-		C3F5E1DA2C2B9FE8004DD66D /* ProxySwitchForMacTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F5E1D92C2B9FE8004DD66D /* ProxySwitchForMacTests.swift */; };
-		C3F5E1E42C2B9FE8004DD66D /* ProxySwitchForMacUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F5E1E32C2B9FE8004DD66D /* ProxySwitchForMacUITests.swift */; };
-		C3F5E1E62C2B9FE8004DD66D /* ProxySwitchForMacUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F5E1E52C2B9FE8004DD66D /* ProxySwitchForMacUITestsLaunchTests.swift */; };
 		C3F5E1F42C2BA0D3004DD66D /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = C3F5E1F32C2BA0D3004DD66D /* KeyboardShortcuts */; };
 /* End PBXBuildFile section */
 
@@ -44,10 +41,7 @@
 		C3F5E1CE2C2B9FE7004DD66D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		C3F5E1D02C2B9FE7004DD66D /* ProxySwitchForMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ProxySwitchForMac.entitlements; sourceTree = "<group>"; };
 		C3F5E1D52C2B9FE8004DD66D /* ProxySwitchForMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProxySwitchForMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		C3F5E1D92C2B9FE8004DD66D /* ProxySwitchForMacTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxySwitchForMacTests.swift; sourceTree = "<group>"; };
 		C3F5E1DF2C2B9FE8004DD66D /* ProxySwitchForMacUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProxySwitchForMacUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		C3F5E1E32C2B9FE8004DD66D /* ProxySwitchForMacUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxySwitchForMacUITests.swift; sourceTree = "<group>"; };
-		C3F5E1E52C2B9FE8004DD66D /* ProxySwitchForMacUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxySwitchForMacUITestsLaunchTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -86,8 +80,6 @@
 			isa = PBXGroup;
 			children = (
 				C3F5E1C42C2B9FE6004DD66D /* ProxySwitchForMac */,
-				C3F5E1D82C2B9FE8004DD66D /* ProxySwitchForMacTests */,
-				C3F5E1E22C2B9FE8004DD66D /* ProxySwitchForMacUITests */,
 				C3F5E1C32C2B9FE6004DD66D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -105,14 +97,14 @@
 		C3F5E1C42C2B9FE6004DD66D /* ProxySwitchForMac */ = {
 			isa = PBXGroup;
 			children = (
-				C3491EC12C50D2A8007663C8 /* Info.plist */,
 				C3F5E1C52C2B9FE6004DD66D /* ProxySwitchForMacApp.swift */,
-				C36A04EF2C336D5B00AEBE3D /* Localizable.xcstrings */,
-				C37A74C12C981F9700336BF1 /* View */,
-				C37A74C02C981F8900336BF1 /* Support */,
 				C3F5E1CB2C2B9FE7004DD66D /* Assets.xcassets */,
-				C3F5E1D02C2B9FE7004DD66D /* ProxySwitchForMac.entitlements */,
+				C3491EC12C50D2A8007663C8 /* Info.plist */,
+				C36A04EF2C336D5B00AEBE3D /* Localizable.xcstrings */,
 				C3F5E1CD2C2B9FE7004DD66D /* Preview Content */,
+				C3F5E1D02C2B9FE7004DD66D /* ProxySwitchForMac.entitlements */,
+				C37A74C02C981F8900336BF1 /* Support */,
+				C37A74C12C981F9700336BF1 /* View */,
 			);
 			path = ProxySwitchForMac;
 			sourceTree = "<group>";
@@ -123,23 +115,6 @@
 				C3F5E1CE2C2B9FE7004DD66D /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
-			sourceTree = "<group>";
-		};
-		C3F5E1D82C2B9FE8004DD66D /* ProxySwitchForMacTests */ = {
-			isa = PBXGroup;
-			children = (
-				C3F5E1D92C2B9FE8004DD66D /* ProxySwitchForMacTests.swift */,
-			);
-			path = ProxySwitchForMacTests;
-			sourceTree = "<group>";
-		};
-		C3F5E1E22C2B9FE8004DD66D /* ProxySwitchForMacUITests */ = {
-			isa = PBXGroup;
-			children = (
-				C3F5E1E32C2B9FE8004DD66D /* ProxySwitchForMacUITests.swift */,
-				C3F5E1E52C2B9FE8004DD66D /* ProxySwitchForMacUITestsLaunchTests.swift */,
-			);
-			path = ProxySwitchForMacUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -214,7 +189,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1600;
-				LastUpgradeCheck = 1600;
+				LastUpgradeCheck = 1610;
 				TargetAttributes = {
 					C3F5E1C12C2B9FE6004DD66D = {
 						CreatedOnToolsVersion = 16.0;
@@ -294,7 +269,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C3F5E1DA2C2B9FE8004DD66D /* ProxySwitchForMacTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -302,8 +276,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C3F5E1E42C2B9FE8004DD66D /* ProxySwitchForMacUITests.swift in Sources */,
-				C3F5E1E62C2B9FE8004DD66D /* ProxySwitchForMacUITestsLaunchTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -328,6 +300,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -357,6 +330,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -392,6 +366,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -421,6 +396,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -454,6 +430,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"ProxySwitchForMac/Preview Content\"";
 				DEVELOPMENT_TEAM = SS3RKYSWZB;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -467,7 +444,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = org.singularity.ProxySwitchForMac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -489,6 +466,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"ProxySwitchForMac/Preview Content\"";
 				DEVELOPMENT_TEAM = SS3RKYSWZB;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -502,7 +480,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = org.singularity.ProxySwitchForMac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -519,6 +497,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = SS3RKYSWZB;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
@@ -537,6 +516,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = SS3RKYSWZB;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
@@ -554,6 +534,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = SS3RKYSWZB;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
@@ -571,6 +552,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = SS3RKYSWZB;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;

@@ -4,42 +4,40 @@
 //  Created by Cody on 2024/6/26.
 //
 
-import SwiftUI
-import KeyboardShortcuts
-import Sparkle
-import UserNotifications
 import SwiftData
+import SwiftUI
 
 @main
 struct ProxySwitchForMacApp: App {
     // 实例化后，就可以通过View的参数传入，实现全局变量
     // 一种属性包装器类型，用于订阅可观察对象，并在可观察对象发生变化时使视图失效。
-    @ObservedObject var appState = AppState()
+    @State var appState = SystemProxyStatus()
     
+
 //    var sharedModelContainer: ModelContainer = {
 //        let schema = Schema([ProxySettings.self])
-//        
+//
 //        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
-//        
+//
 //        do {
 //            return try ModelContainer(for: schema, configurations: [modelConfiguration])
 //        } catch {
 //            fatalError("Could not create ModelContainer: \(error)")
 //        }
 //    }()
-    
+
 //    private let updaterController: SPUStandardUpdaterController
-    
+
 //    init() {
 //        updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
 //    }
-    
+
     var body: some Scene {
         // WindowGroup可以打开多个窗口，适用于多窗口应用
         // Window是单独窗口，适用于单窗口应用
         // Settings是设置窗口
         // MenuBarExtra是菜单栏常驻图标
-        
+
         //        WindowGroup {
         //
         //        }
@@ -75,11 +73,11 @@ struct ProxySwitchForMacApp: App {
 //        Settings {
 //            SettingsView()
 //        }
-        
+
         MenuBarExtra {
-            MenuBarView(appState: appState)
+            
         } label: {
-            if appState.isOn {
+            if appState.totelEnable {
                 Image("MenuBarIcon")
             } else {
                 Image(systemName: "network")
@@ -89,56 +87,35 @@ struct ProxySwitchForMacApp: App {
     }
 }
 
-// 命名并设置默认快捷键
-extension KeyboardShortcuts.Name {
-    static let proxySwitch = Self("proxySwitch", default: .init(.j, modifiers: .command))
-}
 
 // 创建全局对象和其属性
-class AppState: ObservableObject {
-    @Published var proxySettingList = getProxySettings(serviceNames: ["Wi-Fi", "Ethernet"])
-    @Published var isOn: Bool = isProxyOn(proxySettingList: getProxySettings(serviceNames: ["Wi-Fi", "Ethernet"]))
-    // 设置自定义全局快捷键逻辑
-    init() {
-        KeyboardShortcuts.onKeyUp(for: .proxySwitch) { [self] in
-            isOn.toggle()
-            Task {
-                var center = UNUserNotificationCenter.current()
-                center = await requestNotificationPermission(center: center)
-                await sentNotifications(center: center, isOn: isOn)
-            }
-        }
-    }
-}
+
 
 // This view model class publishes when new updates can be checked by the user
-//final class CheckForUpdatesViewModel: ObservableObject {
+// final class CheckForUpdatesViewModel: ObservableObject {
 //    @Published var canCheckForUpdates = false
-//    
+//
 //    init(updater: SPUUpdater) {
 //        updater.publisher(for: \.canCheckForUpdates)
 //            .assign(to: &$canCheckForUpdates)
 //    }
-//}
+// }
 
 // This is the view for the Check for Updates menu item
 // Note this intermediate view is necessary for the disabled state on the menu item to work properly before Monterey.
 // See https://stackoverflow.com/questions/68553092/menu-not-updating-swiftui-bug for more info
-//struct CheckForUpdateView: View {
+// struct CheckForUpdateView: View {
 //    @ObservedObject private var checkForUpdatesViewModel: CheckForUpdatesViewModel
 //    private let updater: SPUUpdater
-//    
+//
 //    init(updater: SPUUpdater) {
 //        self.updater = updater
-//        
+//
 //        self.checkForUpdatesViewModel = CheckForUpdatesViewModel(updater: updater)
 //    }
-//    
+//
 //    var body: some View {
 //        Button("Check for Updates...", action: updater.checkForUpdates)
 //            .disabled(!checkForUpdatesViewModel.canCheckForUpdates)
 //    }
-//}
-
-
-
+// }

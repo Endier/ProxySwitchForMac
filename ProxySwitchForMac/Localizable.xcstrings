@@ -1,9 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    ":" : {
-      "shouldTranslate" : false
-    },
     "AppName" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -22,6 +19,7 @@
       }
     },
     "Click to copy" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
