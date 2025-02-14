@@ -11,45 +11,19 @@ import KeyboardShortcuts
 import SwiftUI
 
 struct ContentView: View {
-//    @EnvironmentObject var appState: AppState
     @Bindable var appState: SystemProxyStatus
 
     var body: some View {
-        HStack {
-            Form {
-                Section {
-//                    TextField(
-//                        "Proxy Server", text: $appState.proxySettings.Server
-//                    )
-//                    .textFieldStyle(RoundedBorderTextFieldStyle() // 使用带有圆角边框的样式
-                    HStack {
-                        Text("Proxy server")
-
-                        Spacer()
-
-//                        Button(appState.proxySettingList[0].Server) {
-//                            copyToClipboard(text: appState.proxySettingList[0].Server)
-//                        }
-//                        .help("Click to copy")
-
-//                        Text(":")
-//                            .fontWeight(.bold)
-
-//                        Button(appState.proxySettingList[0].Port) {
-//                            copyToClipboard(text: appState.proxySettingList[0].Port)
-//                        }
-//                        .help("Click to copy")
-                    }
-
-                    Toggle(isOn: $appState.totelEnable) {
-                        Text("Status")
-                    }
-
-                    KeyboardShortcuts.Recorder(
-                        "Customize global shortcut", name: .proxySwitch)
+        TabView {
+            ProxySettingView(appState: appState)
+                .tabItem {
+                    Label("Settings", systemImage: "gear")
                 }
-            }
-            .formStyle(.grouped) // Form的这种格式类似于系统设置的选项卡风格
+
+            PermissionView()
+                .tabItem {
+                    Label("Permission", systemImage: "hand.raised.square.on.square.fill")
+                }
         }
     }
 }
@@ -63,8 +37,68 @@ struct ContentView: View {
 //
 // }
 
-func copyToClipboard(text: String) {
-    let pasteBoard = NSPasteboard.general
-    pasteBoard.clearContents()
-    pasteBoard.setString(text, forType: .string)
+struct ProxySettingView: View {
+    @Bindable var appState: SystemProxyStatus
+
+    var body: some View {
+        Form {
+            Section {
+//                    TextField(
+//                        "Proxy Server", text: $appState.proxySettings.Server
+//                    )
+//                    .textFieldStyle(RoundedBorderTextFieldStyle() // 使用带有圆角边框的样式
+
+                Toggle(isOn: $appState.totelEnable) {
+                    Text("Status")
+                }
+
+                KeyboardShortcuts.Recorder(
+                    "Customize global shortcut", name: .proxySwitch)
+            }
+        }
+        .formStyle(.grouped) // Form的这种格式类似于系统设置的选项卡风格
+    }
+}
+
+struct PermissionView: View {
+    var body: some View {
+        Form {
+            Section {
+                HStack {
+                    Text("获取通知权限")
+
+                    Spacer()
+
+//                        Button(appState.proxySettingList[0].Server) {
+//                            copyToClipboard(text: appState.proxySettingList[0].Server)
+//                        }
+//                        .help("Click to copy")
+
+//                        Text(":")
+//                            .fontWeight(.bold)
+
+//                        Button(appState.proxySettingList[0].Port) {
+//                            copyToClipboard(text: appState.proxySettingList[0].Port)
+//                        }
+//                        .help("Click to copy")
+
+                    Button("获取") {
+                        requestNotificationPermission()
+                    }
+                }
+            }
+        }
+        .formStyle(.grouped)
+    }
+}
+
+//func copyToClipboard(text: String) {
+//    let pasteBoard = NSPasteboard.general
+//    pasteBoard.clearContents()
+//    pasteBoard.setString(text, forType: .string)
+//}
+
+#Preview {
+//    ContentView(appState: SystemProxyStatus())
+    PermissionView()
 }

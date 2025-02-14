@@ -8,38 +8,32 @@
 import Foundation
 import UserNotifications
 
-func requestNotificationPermission(center: UNUserNotificationCenter) async -> UNUserNotificationCenter {
-    do {
-        try await center.requestAuthorization(options: [.alert, .sound])
-    } catch {
-        print("No Notification Permission")
-    }    
-    return center
+func requestNotificationPermission() {
+    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) {
+        success, error in
+        if success {
+        } else if let error {
+            print(error.localizedDescription)
+        }
+    }
 }
 
-func sentNotifications(center: UNUserNotificationCenter, isOn: Bool) async {
+func sentNotifications(isOn: Bool) {
     let content = UNMutableNotificationContent()
+
     content.title = "Proxy Switch"
     if isOn {
-        content.body =  NSLocalizedString("Your network proxy has been turned ON.", comment: "")
+        content.body = NSLocalizedString("Your network proxy has been turned ON.", comment: "")
     } else {
         content.body = NSLocalizedString("Your network proxy has been turned OFF.", comment: "")
     }
-    
     content.sound = UNNotificationSound.default
-    
+
+    // show this notification 1 second from now
+    // time interval must be greater than 0
     let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-    
+
     let request = UNNotificationRequest(identifier: "proxyStatusChanged", content: content, trigger: trigger)
-    
-    do {
-        try await center.add(request)
-    } catch {
-        print("通知发送失败")
-    }
-    
+
+    UNUserNotificationCenter.current().add(request)
 }
-
-
-
-

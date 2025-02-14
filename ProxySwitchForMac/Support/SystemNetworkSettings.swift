@@ -23,11 +23,7 @@ class SystemProxyStatus {
             _totleEnable = newValue
 
             // 发送通知
-            Task {
-                var center = UNUserNotificationCenter.current()
-                center = await requestNotificationPermission(center: center)
-                await sentNotifications(center: center, isOn: newValue)
-            }
+            sentNotifications(isOn: newValue)
         }
     }
     

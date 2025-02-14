@@ -14,24 +14,8 @@
             filePath = "ProxySwitchForMac/Support/SystemNetworkSettings.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "223"
-            endingLineNumber = "223"
-            landmarkName = "defaultToggleEnable(serviceNames:bool:)"
-            landmarkType = "9">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "BA95EC89-2D11-40AF-8883-B3C59CB94337"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "ProxySwitchForMac/Support/SystemNetworkSettings.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "235"
-            endingLineNumber = "235"
+            startingLineNumber = "219"
+            endingLineNumber = "219"
             landmarkName = "defaultToggleEnable(serviceNames:bool:)"
             landmarkType = "9">
          </BreakpointContent>
@@ -46,8 +30,8 @@
             filePath = "ProxySwitchForMac/Support/SystemNetworkSettings.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "226"
-            endingLineNumber = "226"
+            startingLineNumber = "222"
+            endingLineNumber = "222"
             landmarkName = "defaultToggleEnable(serviceNames:bool:)"
             landmarkType = "9">
          </BreakpointContent>
@@ -62,8 +46,8 @@
             filePath = "ProxySwitchForMac/Support/SystemNetworkSettings.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "231"
-            endingLineNumber = "231"
+            startingLineNumber = "227"
+            endingLineNumber = "227"
             landmarkName = "defaultToggleEnable(serviceNames:bool:)"
             landmarkType = "9">
          </BreakpointContent>
@@ -78,8 +62,8 @@
             filePath = "ProxySwitchForMac/Support/SystemNetworkSettings.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "233"
-            endingLineNumber = "233"
+            startingLineNumber = "229"
+            endingLineNumber = "229"
             landmarkName = "defaultToggleEnable(serviceNames:bool:)"
             landmarkType = "9">
          </BreakpointContent>
@@ -158,8 +142,8 @@
             filePath = "ProxySwitchForMac/ProxySwitchForMacApp.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "80"
-            endingLineNumber = "80"
+            startingLineNumber = "41"
+            endingLineNumber = "41"
             landmarkName = "body"
             landmarkType = "24">
          </BreakpointContent>
@@ -174,8 +158,8 @@
             filePath = "ProxySwitchForMac/ProxySwitchForMacApp.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "81"
-            endingLineNumber = "81"
+            startingLineNumber = "42"
+            endingLineNumber = "42"
             landmarkName = "body"
             landmarkType = "24">
          </BreakpointContent>
@@ -190,8 +174,8 @@
             filePath = "ProxySwitchForMac/ProxySwitchForMacApp.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "84"
-            endingLineNumber = "84"
+            startingLineNumber = "45"
+            endingLineNumber = "45"
             landmarkName = "body"
             landmarkType = "24">
          </BreakpointContent>
@@ -206,8 +190,8 @@
             filePath = "ProxySwitchForMac/ProxySwitchForMacApp.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "83"
-            endingLineNumber = "83"
+            startingLineNumber = "44"
+            endingLineNumber = "44"
             landmarkName = "body"
             landmarkType = "24">
          </BreakpointContent>
