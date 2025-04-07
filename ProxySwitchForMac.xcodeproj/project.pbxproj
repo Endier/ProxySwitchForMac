@@ -9,9 +9,9 @@
 /* Begin PBXBuildFile section */
 		C3245EA02D5F247300279B1B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C3245E9F2D5F247300279B1B /* Preview Assets.xcassets */; };
 		C36A04F02C336D5B00AEBE3D /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C36A04EF2C336D5B00AEBE3D /* Localizable.xcstrings */; };
+		C395F26F2D92658C00FC9F05 /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = C395F26E2D92658C00FC9F05 /* KeyboardShortcuts */; };
 		C3F5E1C62C2B9FE6004DD66D /* ProxySwitchForMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F5E1C52C2B9FE6004DD66D /* ProxySwitchForMacApp.swift */; };
 		C3F5E1CC2C2B9FE7004DD66D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C3F5E1CB2C2B9FE7004DD66D /* Assets.xcassets */; };
-		C3F5E1F42C2BA0D3004DD66D /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = C3F5E1F32C2BA0D3004DD66D /* KeyboardShortcuts */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -23,6 +23,15 @@
 			files = (
 			);
 			name = "Embed PlugIns";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C3264C9C2D879B0D00798BA2 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 6;
+			files = (
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -47,7 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C3F5E1F42C2BA0D3004DD66D /* KeyboardShortcuts in Frameworks */,
+				C395F26F2D92658C00FC9F05 /* KeyboardShortcuts in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -104,6 +113,7 @@
 				C3F5E1BF2C2B9FE6004DD66D /* Frameworks */,
 				C3F5E1C02C2B9FE6004DD66D /* Resources */,
 				C3245EA52D5F279900279B1B /* Embed PlugIns */,
+				C3264C9C2D879B0D00798BA2 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -115,7 +125,7 @@
 			);
 			name = ProxySwitchForMac;
 			packageProductDependencies = (
-				C3F5E1F32C2BA0D3004DD66D /* KeyboardShortcuts */,
+				C395F26E2D92658C00FC9F05 /* KeyboardShortcuts */,
 			);
 			productName = ProxySwitchForMac;
 			productReference = C3F5E1C22C2B9FE6004DD66D /* ProxySwitchForMac.app */;
@@ -147,7 +157,7 @@
 			);
 			mainGroup = C3F5E1B92C2B9FE6004DD66D;
 			packageReferences = (
-				C3F5E1F22C2BA050004DD66D /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
+				C395F26A2D92654100FC9F05 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
 			);
 			productRefGroup = C3F5E1C32C2B9FE6004DD66D /* Products */;
 			projectDirPath = "";
@@ -324,6 +334,7 @@
 				DEVELOPMENT_TEAM = SS3RKYSWZB;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ProxySwitchForMac/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ProxySwitch;
@@ -334,7 +345,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.3;
+				MARKETING_VERSION = 1.4;
 				PRODUCT_BUNDLE_IDENTIFIER = org.singularity.ProxySwitchForMac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -362,6 +373,7 @@
 				DEVELOPMENT_TEAM = SS3RKYSWZB;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ProxySwitchForMac/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ProxySwitch;
@@ -372,7 +384,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.3;
+				MARKETING_VERSION = 1.4;
 				PRODUCT_BUNDLE_IDENTIFIER = org.singularity.ProxySwitchForMac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -407,20 +419,20 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		C3F5E1F22C2BA050004DD66D /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
+		C395F26A2D92654100FC9F05 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
+			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.0.1;
+				minimumVersion = 2.3.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		C3F5E1F32C2BA0D3004DD66D /* KeyboardShortcuts */ = {
+		C395F26E2D92658C00FC9F05 /* KeyboardShortcuts */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = C3F5E1F22C2BA050004DD66D /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
+			package = C395F26A2D92654100FC9F05 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
 			productName = KeyboardShortcuts;
 		};
 /* End XCSwiftPackageProductDependency section */

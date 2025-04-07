@@ -11,9 +11,6 @@ class SystemProxyStatus {
     
     var totelEnable: Bool {
         get {
-//            if WiFiProxySetting?.Enable == "No" && EthernetProxySetting?.Enable == "No" {
-//                return false
-//            }
             return _totleEnable
         }
 
