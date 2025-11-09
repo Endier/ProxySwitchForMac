@@ -34,7 +34,6 @@ struct ProxySettingView: View {
     var body: some View {
         Form {
             Section {
-
                 Toggle(isOn: $appState.totelEnable) {
                     Text("Status")
                 }

@@ -7,7 +7,7 @@ let url = URL(fileURLWithPath: "/usr/sbin/networksetup")
 
 @Observable
 class SystemProxyStatus {
-    var _totleEnable: Bool
+    var _totleEnable: Bool = true
     
     var totelEnable: Bool {
         get {
@@ -38,6 +38,10 @@ class SystemProxyStatus {
             result1 = getProxySetting(argument: "-getsecurewebproxy", serviceName: "Wi-Fi")
             result2 = getProxySetting(argument: "-getsocksfirewallproxy", serviceName: "Wi-Fi")
         }
+        
+        if result?.Enable == "No" && result1?.Enable == "No" && result2?.Enable == "No" {
+            self._totleEnable = false
+        }
 
         if networkServices.contains("Ethernet") {
             result3 = getProxySetting(argument: "-getwebproxy", serviceName: "Ethernet")
@@ -45,10 +49,8 @@ class SystemProxyStatus {
             result5 = getProxySetting(argument: "-getsocksfirewallproxy", serviceName: "Ethernet")
         }
 
-        if result?.Enable == "No" && result1?.Enable == "No" && result2?.Enable == "No" && result3?.Enable == "No" && result4?.Enable == "No" && result5?.Enable == "No" {
+        if result3?.Enable == "No" && result4?.Enable == "No" && result5?.Enable == "No" {
             self._totleEnable = false
-        } else {
-            self._totleEnable = true
         }
         
         KeyboardShortcuts.onKeyDown(for: .proxySwitch) { [self] in
