@@ -2,7 +2,7 @@
 
 [ENGLISH README](README_en.md)
 
-![IMG_0537](https://github.com/Endier/ProxySwitchForMac/assets/78987961/1b0994f1-a399-4fd2-8989-990080907f83)
+<img width="512" alt="截屏2025-04-07 08 12 26" src="https://github.com/user-attachments/assets/a19022b3-5942-4956-8606-f036dfe15f51" />
 
 ## 简单介绍
 
