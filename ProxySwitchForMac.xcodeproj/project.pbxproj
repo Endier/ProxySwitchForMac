@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C3245EA02D5F247300279B1B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C3245E9F2D5F247300279B1B /* Preview Assets.xcassets */; };
 		C36A04F02C336D5B00AEBE3D /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C36A04EF2C336D5B00AEBE3D /* Localizable.xcstrings */; };
 		C395F26F2D92658C00FC9F05 /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = C395F26E2D92658C00FC9F05 /* KeyboardShortcuts */; };
 		C3F5E1C62C2B9FE6004DD66D /* ProxySwitchForMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F5E1C52C2B9FE6004DD66D /* ProxySwitchForMacApp.swift */; };
@@ -37,7 +36,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		C3245E9F2D5F247300279B1B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		C3245EA82D5F29AB00279B1B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C36A04EF2C336D5B00AEBE3D /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		C3F5E1C22C2B9FE6004DD66D /* ProxySwitchForMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ProxySwitchForMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -63,14 +61,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		C3245E9E2D5F245B00279B1B /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				C3245E9F2D5F247300279B1B /* Preview Assets.xcassets */,
-			);
-			path = "Preview Content";
-			sourceTree = "<group>";
-		};
 		C3F5E1B92C2B9FE6004DD66D = {
 			isa = PBXGroup;
 			children = (
@@ -97,7 +87,6 @@
 				C36A04EF2C336D5B00AEBE3D /* Localizable.xcstrings */,
 				C3F5E1D02C2B9FE7004DD66D /* ProxySwitchForMac.entitlements */,
 				C3245EA82D5F29AB00279B1B /* Info.plist */,
-				C3245E9E2D5F245B00279B1B /* Preview Content */,
 			);
 			path = ProxySwitchForMac;
 			sourceTree = "<group>";
@@ -173,7 +162,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C3245EA02D5F247300279B1B /* Preview Assets.xcassets in Resources */,
 				C36A04F02C336D5B00AEBE3D /* Localizable.xcstrings in Resources */,
 				C3F5E1CC2C2B9FE7004DD66D /* Assets.xcassets in Resources */,
 			);
