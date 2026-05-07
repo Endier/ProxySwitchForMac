@@ -7,17 +7,17 @@ let url = URL(fileURLWithPath: "/usr/sbin/networksetup")
 
 @Observable
 class SystemProxyStatus {
-    var _totleEnable: Bool = true
+    var _totalEnable: Bool = true
     
-    var totelEnable: Bool {
+    var totalEnable: Bool {
         get {
-            return _totleEnable
+            return _totalEnable
         }
 
         set {
             let serviceNames = ["Wi-Fi", "Ethernet"]
             defaultToggleEnable(serviceNames: serviceNames, bool: newValue)
-            _totleEnable = newValue
+            _totalEnable = newValue
 
             // 发送通知
             sentNotifications(isOn: newValue)
@@ -26,35 +26,27 @@ class SystemProxyStatus {
     
     init() {
         let networkServices = getSystemNetworkServiceNames()
-        var result: ProxySetting?
-        var result1: ProxySetting?
-        var result2: ProxySetting?
-        var result3: ProxySetting?
-        var result4: ProxySetting?
-        var result5: ProxySetting?
-
-        if networkServices.contains("Wi-Fi") {
-            result = getProxySetting(argument: "-getwebproxy", serviceName: "Wi-Fi")
-            result1 = getProxySetting(argument: "-getsecurewebproxy", serviceName: "Wi-Fi")
-            result2 = getProxySetting(argument: "-getsocksfirewallproxy", serviceName: "Wi-Fi")
+        let serviceNames = ["Wi-Fi", "Ethernet"]
+        let arguments = ["-getwebproxy", "-getsecurewebproxy", "-getsocksfirewallproxy"]
+        
+        var allDisabled = true
+        
+        for serviceName in serviceNames {
+            if networkServices.contains(serviceName) {
+                for argument in arguments {
+                    if let proxySetting = getProxySetting(argument: argument, serviceName: serviceName),
+                       proxySetting.Enable == "Yes" {
+                        allDisabled = false
+                        break
+                    }
+                }
+            }
         }
         
-        if result?.Enable == "No" && result1?.Enable == "No" && result2?.Enable == "No" {
-            self._totleEnable = false
-        }
-
-        if networkServices.contains("Ethernet") {
-            result3 = getProxySetting(argument: "-getwebproxy", serviceName: "Ethernet")
-            result4 = getProxySetting(argument: "-getsecurewebproxy", serviceName: "Ethernet")
-            result5 = getProxySetting(argument: "-getsocksfirewallproxy", serviceName: "Ethernet")
-        }
-
-        if result3?.Enable == "No" && result4?.Enable == "No" && result5?.Enable == "No" {
-            self._totleEnable = false
-        }
+        self._totalEnable = !allDisabled
         
-        KeyboardShortcuts.onKeyDown(for: .proxySwitch) { [self] in
-            totelEnable.toggle()
+        KeyboardShortcuts.onKeyDown(for: .proxySwitch) {
+            self.totalEnable.toggle()
         }
     }
 }
@@ -101,7 +93,7 @@ func getSystemNetworkServiceNames() -> [String] {
         print("Read File failed!")
     }
 
-    if let output = String(data: data!, encoding: .utf8) {
+    if let data = data, let output = String(data: data, encoding: .utf8) {
         // 输出的结果是每行都是一个网络服务的名字，所以通过分割字符串来获取所有的网络服务
         // 另外每次执行命令，第一行会固定插入一个说明：带*的服务名处于停用状态，要先把第一行删除
         serviceNames = output.components(separatedBy: .newlines).map {
@@ -133,18 +125,23 @@ func getProxySetting(argument: String, serviceName: String) -> ProxySetting? {
     // 这里获取开关状态的命令是在子进程执行的，需要把结果传回主进程
     let pipe = Pipe()
     checkProcess.standardOutput = pipe
-    guard let _ = try? checkProcess.run() else {
-        fatalError()
+    do {
+        try checkProcess.run()
+    } catch {
+        print("Failed to run networksetup process: \(error)")
+        return nil
     }
 
     checkProcess.waitUntilExit()
 
     guard let data = try? pipe.fileHandleForReading.readToEnd() else {
-        fatalError("Get system status failed!")
+        print("Failed to read process output")
+        return nil
     }
 
     guard let status = String(data: data, encoding: .utf8) else {
-        fatalError()
+        print("Failed to convert data to string")
+        return nil
     }
 
     let errorMessage = "** Error: Unable to find item in network database."

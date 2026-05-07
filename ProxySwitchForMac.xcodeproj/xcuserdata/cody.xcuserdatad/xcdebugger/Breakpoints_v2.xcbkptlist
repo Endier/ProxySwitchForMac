@@ -64,7 +64,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "228"
             endingLineNumber = "228"
-            landmarkName = "defaultToggleEnable(serviceNames:bool:)"
+            landmarkName = "stringToHashMap(string:)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -80,7 +80,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "18"
             endingLineNumber = "18"
-            landmarkName = "totelEnable"
+            landmarkName = "totalEnable"
             landmarkType = "24">
          </BreakpointContent>
       </BreakpointProxy>
@@ -96,7 +96,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "23"
             endingLineNumber = "23"
-            landmarkName = "totelEnable"
+            landmarkName = "totalEnable"
             landmarkType = "24">
          </BreakpointContent>
       </BreakpointProxy>
@@ -112,7 +112,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "19"
             endingLineNumber = "19"
-            landmarkName = "totelEnable"
+            landmarkName = "totalEnable"
             landmarkType = "24">
          </BreakpointContent>
       </BreakpointProxy>

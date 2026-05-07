@@ -34,7 +34,7 @@ struct ProxySettingView: View {
     var body: some View {
         Form {
             Section {
-                Toggle(isOn: $appState.totelEnable) {
+                Toggle(isOn: $appState.totalEnable) {
                     Text("Status")
                 }
 
@@ -56,19 +56,6 @@ struct PermissionView: View {
 
                     Spacer()
 
-//                        Button(appState.proxySettingList[0].Server) {
-//                            copyToClipboard(text: appState.proxySettingList[0].Server)
-//                        }
-//                        .help("Click to copy")
-
-//                        Text(":")
-//                            .fontWeight(.bold)
-
-//                        Button(appState.proxySettingList[0].Port) {
-//                            copyToClipboard(text: appState.proxySettingList[0].Port)
-//                        }
-//                        .help("Click to copy")
-
                     Button("获取") {
                         requestNotificationPermission()
                     }
@@ -79,11 +66,6 @@ struct PermissionView: View {
     }
 }
 
-// func copyToClipboard(text: String) {
-//    let pasteBoard = NSPasteboard.general
-//    pasteBoard.clearContents()
-//    pasteBoard.setString(text, forType: .string)
-// }
 
 #Preview {
     PermissionView()
