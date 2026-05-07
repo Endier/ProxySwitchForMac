@@ -33,6 +33,18 @@ struct ProxySwitchForMacApp: App {
 //        }
 
         MenuBarExtra {
+            Button("打开主窗口") {
+                if let window = NSApplication.shared.windows.first(where: { $0.identifier?.rawValue == "mainwindow" }) {
+                    window.makeKeyAndOrderFront(nil)
+                }
+            }
+            
+            Divider()
+            
+            Button("退出") {
+                NSApplication.shared.terminate(nil)
+            }
+            .keyboardShortcut("q", modifiers: .command)
         } label: {
             if appState.totelEnable {
                 Image("MenuBarIcon")
