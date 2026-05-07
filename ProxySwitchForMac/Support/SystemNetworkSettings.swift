@@ -96,16 +96,10 @@ func getSystemNetworkServiceNames() -> [String] {
     if let data = data, let output = String(data: data, encoding: .utf8) {
         // 输出的结果是每行都是一个网络服务的名字，所以通过分割字符串来获取所有的网络服务
         // 另外每次执行命令，第一行会固定插入一个说明：带*的服务名处于停用状态，要先把第一行删除
-        serviceNames = output.components(separatedBy: .newlines).map {
-            String($0)
-        }
-        serviceNames.remove(at: 0)
-        // 排除掉以*开头的字符串
-        serviceNames.removeAll(where: {
-            $0.hasPrefix("*") || $0.trimmingCharacters(in: .whitespaces).isEmpty
-        })
-        // 另一种写法
-        //        serviceNames = serviceNames.filter { !$0.hasPrefix("*") || $0.trimmingCharacters(in: .whitespaces).isEmpty }
+        serviceNames = output.components(separatedBy: .newlines)
+            .dropFirst()
+            .map { String($0) }
+            .filter { !$0.hasPrefix("*") && !$0.trimmingCharacters(in: .whitespaces).isEmpty }
     }
 
     #if DEBUG
@@ -183,26 +177,20 @@ func getProxySettings(serviceNames: [String]) -> [ProxySetting] {
 }
 
 /// 将所有网络服务名输入，逐个获取每个开关的状态，如果有一个关了就返回false，全开才返回true
-func isSwitchOn(proxySettingList: [ProxySetting]) -> Bool {
-    var num = 0
-    for proxySetting in proxySettingList {
-        if proxySetting.Enable == "Yes" {
-            num += 1
-        }
-    }
-    if num == 0 {
-        return false
-    } else {
-        return true
-    }
- }
+//func isSwitchOn(proxySettingList: [ProxySetting]) -> Bool {
+//    proxySettingList.allSatisfy { $0.Enable == "Yes" }
+//}
 
 func toggleEnable(argument: String, serviceName: String, enable: String) {
     let process = Process()
     process.executableURL = url
     process.arguments = [argument, serviceName, enable]
-    guard let _ = try? process.run() else {
-        fatalError()
+    
+    do {
+        try process.run()
+        process.waitUntilExit()
+    } catch {
+        print("Failed to run networksetup process: \(error)")
     }
 }
 

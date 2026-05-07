@@ -14,9 +14,9 @@
             filePath = "ProxySwitchForMac/Support/SystemNetworkSettings.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "218"
-            endingLineNumber = "218"
-            landmarkName = "defaultToggleEnable(serviceNames:bool:)"
+            startingLineNumber = "217"
+            endingLineNumber = "217"
+            landmarkName = "stringToHashMap(string:)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -30,9 +30,9 @@
             filePath = "ProxySwitchForMac/Support/SystemNetworkSettings.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "221"
-            endingLineNumber = "221"
-            landmarkName = "defaultToggleEnable(serviceNames:bool:)"
+            startingLineNumber = "220"
+            endingLineNumber = "220"
+            landmarkName = "stringToHashMap(string:)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -46,9 +46,9 @@
             filePath = "ProxySwitchForMac/Support/SystemNetworkSettings.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "226"
-            endingLineNumber = "226"
-            landmarkName = "defaultToggleEnable(serviceNames:bool:)"
+            startingLineNumber = "225"
+            endingLineNumber = "225"
+            landmarkName = "stringToHashMap(string:)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -62,8 +62,8 @@
             filePath = "ProxySwitchForMac/Support/SystemNetworkSettings.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "228"
-            endingLineNumber = "228"
+            startingLineNumber = "227"
+            endingLineNumber = "227"
             landmarkName = "stringToHashMap(string:)"
             landmarkType = "9">
          </BreakpointContent>
