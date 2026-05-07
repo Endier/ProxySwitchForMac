@@ -39,7 +39,8 @@ struct ProxySettingView: View {
                 }
 
                 KeyboardShortcuts.Recorder(
-                    "Customize global shortcut", name: .proxySwitch)
+                    "Customize global shortcut", name: .proxySwitch
+                )
             }
         }
         .formStyle(.grouped)
@@ -78,11 +79,11 @@ struct PermissionView: View {
     }
 }
 
-//func copyToClipboard(text: String) {
+// func copyToClipboard(text: String) {
 //    let pasteBoard = NSPasteboard.general
 //    pasteBoard.clearContents()
 //    pasteBoard.setString(text, forType: .string)
-//}
+// }
 
 #Preview {
     PermissionView()

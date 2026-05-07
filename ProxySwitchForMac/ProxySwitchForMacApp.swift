@@ -64,10 +64,11 @@ struct ProxySwitchForMacApp: App {
             }
             .keyboardShortcut("q", modifiers: .command)
         } label: {
+            // 菜单栏图标会被系统强制指定颜色，以适配深色模式
             if appState.totelEnable {
-                Image("MenuBarIcon")
+                Image(systemName: "network.badge.shield.half.filled")
             } else {
-                Image(systemName: "network")
+                Image(systemName: "network.slash")
             }
         }
     }
