@@ -6,7 +6,6 @@
 //
 
 import AppKit
-import Carbon
 import KeyboardShortcuts
 import SwiftUI
 
@@ -66,7 +65,14 @@ struct PermissionView: View {
     }
 }
 
-
 #Preview {
     PermissionView()
+}
+
+#Preview {
+    ProxySettingView(appState: SystemProxyStatus())
+}
+
+#Preview {
+    ContentView(appState: SystemProxyStatus())
 }

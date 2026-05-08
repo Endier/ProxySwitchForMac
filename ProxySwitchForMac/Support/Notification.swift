@@ -10,15 +10,14 @@ import UserNotifications
 
 func requestNotificationPermission() {
     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) {
-        success, error in
-        if success {
-        } else if let error {
+        _, error in
+        if let error {
             print(error.localizedDescription)
         }
     }
 }
 
-func sentNotifications(isOn: Bool) {
+func sendNotification(isOn: Bool) {
     let content = UNMutableNotificationContent()
 
     content.title = "Proxy Switch"
@@ -33,7 +32,12 @@ func sentNotifications(isOn: Bool) {
     // time interval must be greater than 0
     let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
 
-    let request = UNNotificationRequest(identifier: "proxyStatusChanged", content: content, trigger: trigger)
+    let request = UNNotificationRequest(
+        identifier: "proxyStatusChanged", content: content, trigger: trigger)
 
-    UNUserNotificationCenter.current().add(request)
+    UNUserNotificationCenter.current().add(request) { error in
+        if let error = error {
+            print("Failed to send notification: \(error)")
+        }
+    }
 }

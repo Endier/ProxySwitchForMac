@@ -4,28 +4,34 @@
 //  Created by Cody on 2024/6/26.
 //
 
-import SwiftData
 import SwiftUI
 
 @main
 struct ProxySwitchForMacApp: App {
     @State var appState = SystemProxyStatus()
     @Environment(\.openWindow) private var openWindow
-    
+
     private func activateMainWindow() {
-        if let window = NSApplication.shared.windows.first(where: { $0.identifier?.rawValue == "mainwindow" }) {
+        if let window = NSApplication.shared.windows.first(where: {
+            $0.identifier?.rawValue == "mainwindow"
+        }) {
             NSApp.activate(ignoringOtherApps: true)
             window.makeKeyAndOrderFront(nil)
             window.orderFrontRegardless()
             window.level = .floating
         } else {
             openWindow(id: "mainwindow")
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                NSApp.activate(ignoringOtherApps: true)
-                if let window = NSApplication.shared.windows.first(where: { $0.identifier?.rawValue == "mainwindow" }) {
+
+            Task {
+                try? await Task.sleep(for: .seconds(0.1))
+                if let window = NSApplication.shared.windows.first(where: {
+                    $0.identifier?.rawValue == "mainwindow"
+                }) {
+                    NSApp.activate(ignoringOtherApps: true)
                     window.makeKeyAndOrderFront(nil)
                     window.orderFrontRegardless()
                     window.level = .floating
+                    return  // 找到窗口后退出
                 }
             }
         }
@@ -40,25 +46,25 @@ struct ProxySwitchForMacApp: App {
             if #available(macOS 15.0, *) {
                 ContentView(appState: appState)
                     .frame(width: 400, height: 120)
-                    .containerBackground(.ultraThinMaterial, for: .window) // 窗口材质
+                    .containerBackground(.ultraThinMaterial, for: .window)  // 窗口材质
             } else {
                 ContentView(appState: appState)
                     .frame(width: 400, height: 120)
             }
         }
-        .windowResizability(.contentSize) // 窗口大小适配View大小
+        .windowResizability(.contentSize)  // 窗口大小适配View大小
 
-//        Settings {
-//            SettingsView()
-//        }
+        //        Settings {
+        //            SettingsView()
+        //        }
 
         MenuBarExtra {
             Button("打开主窗口") {
                 activateMainWindow()
             }
-            
+
             Divider()
-            
+
             Button("退出") {
                 NSApplication.shared.terminate(nil)
             }

@@ -1,0 +1,16 @@
+# Xcode
+*.xcuserdata
+xcuserdata/
+DerivedData/
+.build/
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+
+# Build products
+build/
+*.app
+*.dmg

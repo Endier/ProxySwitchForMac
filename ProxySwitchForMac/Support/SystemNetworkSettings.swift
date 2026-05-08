@@ -1,230 +1,185 @@
-import CFNetwork
 import Foundation
-import UserNotifications
 import KeyboardShortcuts
+import UserNotifications
 
-let url = URL(fileURLWithPath: "/usr/sbin/networksetup")
+// MARK: - ProxySetting
 
-@Observable
-class SystemProxyStatus {
-    var _totalEnable: Bool = true
-    
-    var totalEnable: Bool {
-        get {
-            return _totalEnable
-        }
-
-        set {
-            let serviceNames = ["Wi-Fi", "Ethernet"]
-            defaultToggleEnable(serviceNames: serviceNames, bool: newValue)
-            _totalEnable = newValue
-
-            // 发送通知
-            sentNotifications(isOn: newValue)
-        }
-    }
-    
-    init() {
-        let networkServices = getSystemNetworkServiceNames()
-        let serviceNames = ["Wi-Fi", "Ethernet"]
-        let arguments = ["-getwebproxy", "-getsecurewebproxy", "-getsocksfirewallproxy"]
-        
-        var allDisabled = true
-        
-        for serviceName in serviceNames {
-            if networkServices.contains(serviceName) {
-                for argument in arguments {
-                    if let proxySetting = getProxySetting(argument: argument, serviceName: serviceName),
-                       proxySetting.Enable == "Yes" {
-                        allDisabled = false
-                        break
-                    }
-                }
-            }
-        }
-        
-        self._totalEnable = !allDisabled
-        
-        KeyboardShortcuts.onKeyDown(for: .proxySwitch) {
-            self.totalEnable.toggle()
-        }
-    }
+struct ProxySetting {
+    let enable: String
+    let server: String
+    let port: String
 }
 
-// 命名并设置默认快捷键
-extension KeyboardShortcuts.Name {
-    static let proxySwitch = Self("proxySwitch", default: .init(.j, modifiers: .command))
+// MARK: - NetworkSetupError
+
+enum NetworkSetupError: Error {
+    case invalidOutput
 }
 
-class ProxySetting {
-    public var Enable: String
-    public var Server: String
-    public var Port: String
+// MARK: - NetworkSetupService
 
-    init(Enable: String, Server: String, Port: String) {
-        self.Enable = Enable
-        self.Server = Server
-        self.Port = Port
-    }
-}
+// 没有 case 的 enum 不能被实例化，所以经常被用来写一些纯工具方法集合
+enum NetworkSetupService {
+    private static let executableURL = URL(fileURLWithPath: "/usr/sbin/networksetup")
 
-func getSystemNetworkServiceNames() -> [String] {
-    var serviceNames: [String] = []
-    // 先创建子线程
-    let checkProcess = Process()
-    let pipe = Pipe()
-    // 在子线程中执行命令
-    checkProcess.executableURL = url
-    checkProcess.arguments = ["-listallnetworkservices"]
-    checkProcess.standardOutput = pipe
-
-    do {
-        try checkProcess.run()
-    } catch {
-        print("Process run error!")
-    }
-
-    checkProcess.waitUntilExit()
-    var data: Data?
-
-    do {
-        data = try pipe.fileHandleForReading.readToEnd()
-    } catch {
-        print("Read File failed!")
-    }
-
-    if let data = data, let output = String(data: data, encoding: .utf8) {
-        // 输出的结果是每行都是一个网络服务的名字，所以通过分割字符串来获取所有的网络服务
-        // 另外每次执行命令，第一行会固定插入一个说明：带*的服务名处于停用状态，要先把第一行删除
-        serviceNames = output.components(separatedBy: .newlines)
+    /// 获取所有活跃的网络服务名
+    static func getNetworkServiceNames() async throws -> [String] {
+        let output = try await run(arguments: ["-listallnetworkservices"])
+        return
+            output
+            .components(separatedBy: .newlines)
             .dropFirst()
             .map { String($0) }
             .filter { !$0.hasPrefix("*") && !$0.trimmingCharacters(in: .whitespaces).isEmpty }
     }
 
-    #if DEBUG
-        print(serviceNames)
-    #endif
-
-    return serviceNames
-}
-
-func getProxySetting(argument: String, serviceName: String) -> ProxySetting? {
-    // 先创建子线程
-    let checkProcess = Process()
-    checkProcess.executableURL = url
-    checkProcess.arguments = [argument, serviceName]
-
-    // Pipe就是类似于channel的东西，用于在不同的进程间传递数据
-    // 这里获取开关状态的命令是在子进程执行的，需要把结果传回主进程
-    let pipe = Pipe()
-    checkProcess.standardOutput = pipe
-    do {
-        try checkProcess.run()
-    } catch {
-        print("Failed to run networksetup process: \(error)")
-        return nil
-    }
-
-    checkProcess.waitUntilExit()
-
-    guard let data = try? pipe.fileHandleForReading.readToEnd() else {
-        print("Failed to read process output")
-        return nil
-    }
-
-    guard let status = String(data: data, encoding: .utf8) else {
-        print("Failed to convert data to string")
-        return nil
-    }
-
-    let errorMessage = "** Error: Unable to find item in network database."
-
-    if status != errorMessage {
-        let hashmap = stringToHashMap(string: status)
-        let enabled = hashmap["Enabled"] ?? ""
-        let server = hashmap["Server"] ?? ""
-        let port = hashmap["Port"] ?? ""
-        let proxySetting = ProxySetting(
-            Enable: enabled,
-            Server: server,
-            Port: port
+    /// 获取指定服务的代理设置（HTTP/HTTPS/SOCKS）
+    static func getProxySetting(argument: String, serviceName: String) async throws -> ProxySetting
+    {
+        let output = try await run(arguments: [argument, serviceName])
+        let dict = parseProxyOutput(output)
+        return ProxySetting(
+            enable: dict["Enabled"] ?? "",
+            server: dict["Server"] ?? "",
+            port: dict["Port"] ?? ""
         )
-
-        return proxySetting
     }
 
-    return nil
-}
+    /// 开关指定代理
+    static func toggleProxy(argument: String, serviceName: String, enable: Bool) async throws {
+        let state = enable ? "on" : "off"
+        try await run(arguments: [argument, serviceName, state])
+    }
 
-func getProxySettings(serviceNames: [String]) -> [ProxySetting] {
-    var proxySettingList: [ProxySetting] = []
-
-    let arguments = [
-        "-getwebproxy", "-getsecurewebproxy", "-getsocksfirewallproxy",
-    ]
-
-    for argument in arguments {
+    /// 判断当前代理是否处于开启状态（任一代理开启了即为开启）
+    static func isProxyEnabled(serviceNames: [String]) async -> Bool {
+        let arguments = ["-getwebproxy", "-getsecurewebproxy", "-getsocksfirewallproxy"]
         for serviceName in serviceNames {
-            let proxySetting = getProxySetting(argument: argument, serviceName: serviceName)
-            if proxySetting != nil {
-                proxySettingList.append(proxySetting!)
+            for argument in arguments {
+                if let setting = try? await getProxySetting(
+                    argument: argument, serviceName: serviceName),
+                    setting.enable == "Yes"
+                {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    /// 批量开关代理（HTTP、HTTPS、SOCKS）
+    static func setAllProxyStates(serviceNames: [String], enabled: Bool) async {
+        let arguments = [
+            "-setwebproxystate", "-setsecurewebproxystate",
+            "-setsocksfirewallproxystate",
+        ]
+        for serviceName in serviceNames {
+            for argument in arguments {
+                try? await toggleProxy(
+                    argument: argument, serviceName: serviceName, enable: enabled)
             }
         }
     }
 
-    return proxySettingList
-}
+    // MARK: - Private Helpers
 
-/// 将所有网络服务名输入，逐个获取每个开关的状态，如果有一个关了就返回false，全开才返回true
-//func isSwitchOn(proxySettingList: [ProxySetting]) -> Bool {
-//    proxySettingList.allSatisfy { $0.Enable == "Yes" }
-//}
+    @discardableResult
+    private static func run(arguments: [String]) async throws -> String {
+        return try await withCheckedThrowingContinuation { continuation in
+            let process = Process()
+            process.executableURL = executableURL
+            process.arguments = arguments
 
-func toggleEnable(argument: String, serviceName: String, enable: String) {
-    let process = Process()
-    process.executableURL = url
-    process.arguments = [argument, serviceName, enable]
-    
-    do {
-        try process.run()
-        process.waitUntilExit()
-    } catch {
-        print("Failed to run networksetup process: \(error)")
-    }
-}
+            let pipe = Pipe()
+            process.standardOutput = pipe
 
-/// 开关代理不需要很精细，全关或全开即可
-public func defaultToggleEnable(serviceNames: [String], bool: Bool) {
-    // 在子线程中执行命令
-    // 分别是http代理、https代理、SOCKS代理
-    let arguments = [
-        "-setwebproxystate", "-setsecurewebproxystate",
-        "-setsocksfirewallproxystate",
-    ]
-    // 最后的变量，填写网络络服务的名称，如 "Wi-Fi" 或 "Ethernet"
+            process.terminationHandler = { _ in
+                do {
+                    guard let data = try pipe.fileHandleForReading.readToEnd(),
+                        let output = String(data: data, encoding: .utf8)
+                    else {
+                        continuation.resume(throwing: NetworkSetupError.invalidOutput)
+                        return
+                    }
+                    continuation.resume(returning: output)
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
 
-    let onOrOff: String = bool ? "on" : "off"
-
-    for serviceName in serviceNames {
-        for argument in arguments {
-            toggleEnable(argument: argument, serviceName: serviceName, enable: onOrOff)
-        }
-    }
-}
-
-func stringToHashMap(string: String) -> [String: String] {
-    var hashMap: [String: String] = [:]
-
-    // Swift 这个字符串分割挺好用的
-    let lines = string.components(separatedBy: .newlines)
-
-    for line in lines {
-        let KV = line.components(separatedBy: ": ")
-        if KV.count == 2 {
-            hashMap[KV[0]] = KV[1]
+            do {
+                try process.run()
+            } catch {
+                continuation.resume(throwing: error)
+            }
         }
     }
 
-    return hashMap
+    private static func parseProxyOutput(_ string: String) -> [String: String] {
+        var dict: [String: String] = [:]
+        let lines = string.components(separatedBy: .newlines)
+        for line in lines {
+            let parts = line.components(separatedBy: ": ")
+            if parts.count == 2 {
+                dict[parts[0]] = parts[1]
+            }
+        }
+        return dict
+    }
+}
+
+// MARK: - SystemProxyStatus
+
+@MainActor
+@Observable
+class SystemProxyStatus {
+    var totalEnable: Bool = true {
+        didSet {
+            guard !isRefreshingState else { return }
+            toggleTask?.cancel()
+            let isEnabled = totalEnable
+            toggleTask = Task { @MainActor in
+                let serviceNames = await Self.fetchActiveServiceNames()
+                await NetworkSetupService.setAllProxyStates(
+                    serviceNames: serviceNames, enabled: isEnabled)
+                sendNotification(isOn: isEnabled)
+            }
+        }
+    }
+
+    private var toggleTask: Task<Void, Never>?
+    /// 初始状态为 `true`，防止 `didSet` 在初始状态加载时触发 toggle
+    private var isRefreshingState = true
+
+    nonisolated init() {
+        Task { @MainActor in
+            let serviceNames = await Self.fetchActiveServiceNames()
+            let isEnabled = await NetworkSetupService.isProxyEnabled(serviceNames: serviceNames)
+            if !Task.isCancelled {
+                self.totalEnable = isEnabled
+                self.isRefreshingState = false
+            }
+        }
+
+        KeyboardShortcuts.onKeyDown(for: .proxySwitch) { [weak self] in
+            Task { @MainActor in
+                self?.totalEnable.toggle()
+            }
+        }
+    }
+
+    /// 获取活跃的网络服务名，失败时回退到默认值
+    private static func fetchActiveServiceNames() async -> [String] {
+        guard let names = try? await NetworkSetupService.getNetworkServiceNames(), !names.isEmpty
+        else {
+            return ["Wi-Fi", "Ethernet"]
+        }
+        return names
+    }
+}
+
+// MARK: - KeyboardShortcuts
+
+extension KeyboardShortcuts.Name {
+    static let proxySwitch = Self("proxySwitch", default: .init(.j, modifiers: .command))
 }

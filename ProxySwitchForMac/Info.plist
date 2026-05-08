@@ -4,8 +4,6 @@
 <dict>
 	<key>LSUIElement</key>
 	<true/>
-	<key>NSUserNotificationAlertStyle</key>
-	<string>alert</string>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>This app needs to send you notifications when the network proxy status changes.</string>
 </dict>
