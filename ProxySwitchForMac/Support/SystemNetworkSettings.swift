@@ -14,6 +14,7 @@ struct ProxySetting {
 
 enum NetworkSetupError: Error {
     case invalidOutput
+    case commandFailed(status: Int32, message: String)
 }
 
 // MARK: - NetworkSetupService
@@ -52,43 +53,55 @@ enum NetworkSetupService {
     }
 
     /// 检查当前代理是否「全开」——所有活跃服务的 HTTP、HTTPS、SOCKS 都必须为 Yes
+    ///
+    /// 跳过没有配置代理的服务或代理类型（server 为空或命令失败），
+    /// 只检查实际存在配置的代理是否全部开启。
     static func isProxyEnabled(serviceNames: [String]) async -> Bool {
         let arguments = ["-getwebproxy", "-getsecurewebproxy", "-getsocksfirewallproxy"]
+        var anyEnabled = false
         for serviceName in serviceNames {
             for argument in arguments {
                 if let setting = try? await getProxySetting(
-                    argument: argument, serviceName: serviceName),
-                    setting.enable != "Yes"
+                    argument: argument, serviceName: serviceName)
                 {
-                    return false  // 只要有一个不是 Yes，就不算全开
+                    // 有代理配置：检查是否开启
+                    if setting.enable == "Yes" {
+                        anyEnabled = true
+                    } else if !setting.server.isEmpty {
+                        // 已配置但未开启 → 不算全开
+                        return false
+                    }
                 }
+                // setting 为 nil 或无 server：该服务未使用此代理类型，跳过
             }
         }
-        return true
+        return anyEnabled
     }
 
-    /// 批量开关代理（HTTP、HTTPS、SOCKS），失败时撤销已成功的操作再抛出错误
+    /// 批量开关代理（HTTP、HTTPS、SOCKS）
+    ///
+    /// 开启时（`enabled: true`）：跳过个别失败的代理类型（如未配置 SOCKS），
+    /// 仅当全部失败时才抛出错误。关闭时一律尝试，全部失败才抛出错误。
     static func setAllProxyStates(serviceNames: [String], enabled: Bool) async throws {
         let arguments = [
             "-setwebproxystate", "-setsecurewebproxystate",
             "-setsocksfirewallproxystate",
         ]
-        var completed: [(argument: String, serviceName: String)] = []
-        do {
-            for serviceName in serviceNames {
-                for argument in arguments {
+        var failures = 0
+        for serviceName in serviceNames {
+            for argument in arguments {
+                do {
                     try await toggleProxy(
                         argument: argument, serviceName: serviceName, enable: enabled)
-                    completed.append((argument, serviceName))
+                } catch {
+                    failures += 1
                 }
             }
-        } catch {
-            // 撤销已成功的操作，逆序保证依赖顺序
-            for (argument, serviceName) in completed.reversed() {
-                try? await toggleProxy(
-                    argument: argument, serviceName: serviceName, enable: !enabled)
-            }
-            throw error
+        }
+        let total = serviceNames.count * arguments.count
+        if failures == total {
+            throw NetworkSetupError.commandFailed(
+                status: -1, message: "所有代理开关操作均失败")
         }
     }
 
@@ -103,8 +116,22 @@ enum NetworkSetupService {
 
             let pipe = Pipe()
             process.standardOutput = pipe
+            let errorPipe = Pipe()
+            process.standardError = errorPipe
 
             process.terminationHandler = { _ in
+                let errorMessage =
+                    (try? errorPipe.fileHandleForReading.readToEnd())
+                    .flatMap { String(data: $0, encoding: .utf8) } ?? ""
+
+                guard process.terminationStatus == 0 else {
+                    continuation.resume(
+                        throwing: NetworkSetupError.commandFailed(
+                            status: process.terminationStatus,
+                            message: errorMessage))
+                    return
+                }
+
                 do {
                     let data: Data
                     if let readData = try pipe.fileHandleForReading.readToEnd() {
