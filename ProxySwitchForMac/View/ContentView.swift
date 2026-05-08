@@ -8,6 +8,7 @@
 import AppKit
 import KeyboardShortcuts
 import SwiftUI
+import UserNotifications
 
 struct ContentView: View {
     @Bindable var appState: SystemProxyStatus
@@ -31,22 +32,31 @@ struct ProxySettingView: View {
     @Bindable var appState: SystemProxyStatus
 
     var body: some View {
-        Form {
-            Section {
-                Toggle(isOn: $appState.totalEnable) {
-                    Text("Status")
-                }
+        Group {
+            if appState.isLoading {
+                ProgressView("正在检测当前代理状态…")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                Form {
+                    Section {
+                        Toggle(isOn: $appState.totalEnable) {
+                            Text("Status")
+                        }
 
-                KeyboardShortcuts.Recorder(
-                    "Customize global shortcut", name: .proxySwitch
-                )
+                        KeyboardShortcuts.Recorder(
+                            "Customize global shortcut", name: .proxySwitch
+                        )
+                    }
+                }
+                .formStyle(.grouped)
             }
         }
-        .formStyle(.grouped)
     }
 }
 
 struct PermissionView: View {
+    @State private var authorizationStatus: UNAuthorizationStatus = .notDetermined
+
     var body: some View {
         Form {
             Section {
@@ -55,13 +65,50 @@ struct PermissionView: View {
 
                     Spacer()
 
-                    Button("获取") {
-                        requestNotificationPermission()
+                    switch authorizationStatus {
+                    case .notDetermined:
+                        Button("获取") {
+                            requestNotificationPermission()
+                            checkStatus()
+                        }
+                    case .authorized, .provisional, .ephemeral:
+                        Text("已授权")
+                            .foregroundColor(.green)
+                    case .denied:
+                        HStack(spacing: 4) {
+                            Text("已拒绝")
+                                .foregroundColor(.red)
+                            Button("打开设置") {
+                                if let url = URL(
+                                    string:
+                                        "x-apple.systempreferences:com.apple.preference.notifications"
+                                ) {
+                                    NSWorkspace.shared.open(url)
+                                }
+                            }
+                        }
+                    @unknown default:
+                        Button("获取") {
+                            requestNotificationPermission()
+                            checkStatus()
+                        }
                     }
                 }
             }
         }
         .formStyle(.grouped)
+        .task {
+            checkStatus()
+        }
+    }
+
+    private func checkStatus() {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            let status = settings.authorizationStatus
+            Task { @MainActor in
+                authorizationStatus = status
+            }
+        }
     }
 }
 

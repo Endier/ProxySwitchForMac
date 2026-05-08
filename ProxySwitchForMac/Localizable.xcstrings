@@ -18,6 +18,23 @@
         }
       }
     },
+    "正在检测当前代理状态…" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checking current proxy status…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在检测当前代理状态…"
+          }
+        }
+      }
+    },
     "Customize global shortcut" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -31,6 +48,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "自定义全局快捷键"
+          }
+        }
+      }
+    },
+    "Failed to toggle proxy: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Failed to toggle proxy: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切换代理失败：%@"
           }
         }
       }
@@ -74,6 +108,12 @@
     "Your network proxy has been turned OFF." : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your network proxy has been turned OFF."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -99,17 +139,82 @@
         }
       }
     },
+    "已拒绝" : {
+
+    },
+    "已授权" : {
+
+    },
     "打开主窗口" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Main Window"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开主窗口"
+          }
+        }
+      }
+    },
+    "打开设置" : {
 
     },
     "获取" : {
-
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Request"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "获取"
+          }
+        }
+      }
     },
     "获取通知权限" : {
-
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notification Permission"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "获取通知权限"
+          }
+        }
+      }
     },
     "退出" : {
-
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quit"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "退出"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

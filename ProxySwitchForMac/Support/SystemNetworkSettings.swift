@@ -51,32 +51,38 @@ enum NetworkSetupService {
         try await run(arguments: [argument, serviceName, state])
     }
 
-    /// 判断当前代理是否处于开启状态（任一代理开启了即为开启）
+    /// 检查当前代理是否「全开」——所有活跃服务的 HTTP、HTTPS、SOCKS 都必须为 Yes
     static func isProxyEnabled(serviceNames: [String]) async -> Bool {
         let arguments = ["-getwebproxy", "-getsecurewebproxy", "-getsocksfirewallproxy"]
         for serviceName in serviceNames {
             for argument in arguments {
                 if let setting = try? await getProxySetting(
                     argument: argument, serviceName: serviceName),
-                    setting.enable == "Yes"
+                    setting.enable != "Yes"
                 {
-                    return true
+                    return false  // 只要有一个不是 Yes，就不算全开
                 }
             }
         }
-        return false
+        return true
     }
 
-    /// 批量开关代理（HTTP、HTTPS、SOCKS）
-    static func setAllProxyStates(serviceNames: [String], enabled: Bool) async {
+    /// 批量开关代理（HTTP、HTTPS、SOCKS），失败时抛出第一个错误
+    static func setAllProxyStates(serviceNames: [String], enabled: Bool) async throws {
         let arguments = [
             "-setwebproxystate", "-setsecurewebproxystate",
             "-setsocksfirewallproxystate",
         ]
         for serviceName in serviceNames {
             for argument in arguments {
-                try? await toggleProxy(
-                    argument: argument, serviceName: serviceName, enable: enabled)
+                do {
+                    try await toggleProxy(
+                        argument: argument, serviceName: serviceName, enable: enabled)
+                } catch let error as NetworkSetupError {
+                    throw error
+                } catch {
+                    throw NetworkSetupError.invalidOutput
+                }
             }
         }
     }
@@ -95,12 +101,14 @@ enum NetworkSetupService {
 
             process.terminationHandler = { _ in
                 do {
-                    guard let data = try pipe.fileHandleForReading.readToEnd(),
-                        let output = String(data: data, encoding: .utf8)
-                    else {
-                        continuation.resume(throwing: NetworkSetupError.invalidOutput)
-                        return
+                    let data: Data
+                    if let readData = try pipe.fileHandleForReading.readToEnd() {
+                        data = readData
+                    } else {
+                        // Pipe 在写端关闭后且无数据时返回 nil，对于无输出的命令是正常情况
+                        data = Data()
                     }
+                    let output = String(data: data, encoding: .utf8) ?? ""
                     continuation.resume(returning: output)
                 } catch {
                     continuation.resume(throwing: error)
@@ -133,6 +141,7 @@ enum NetworkSetupService {
 @MainActor
 @Observable
 class SystemProxyStatus {
+    /// 当前代理开启状态
     var totalEnable: Bool = true {
         didSet {
             guard !isRefreshingState else { return }
@@ -140,12 +149,23 @@ class SystemProxyStatus {
             let isEnabled = totalEnable
             toggleTask = Task { @MainActor in
                 let serviceNames = await Self.fetchActiveServiceNames()
-                await NetworkSetupService.setAllProxyStates(
-                    serviceNames: serviceNames, enabled: isEnabled)
-                sendNotification(isOn: isEnabled)
+                do {
+                    try await NetworkSetupService.setAllProxyStates(
+                        serviceNames: serviceNames, enabled: isEnabled)
+                    sendNotification(isOn: isEnabled)
+                } catch {
+                    guard !Task.isCancelled else { return }
+                    isRefreshingState = true
+                    totalEnable = !isEnabled
+                    isRefreshingState = false
+                    sendErrorNotification(error: error)
+                }
             }
         }
     }
+
+    /// 初始状态加载中，UI 应显示加载动画而非实际状态
+    private(set) var isLoading = true
 
     private var toggleTask: Task<Void, Never>?
     /// 初始状态为 `true`，防止 `didSet` 在初始状态加载时触发 toggle
@@ -156,8 +176,14 @@ class SystemProxyStatus {
             let serviceNames = await Self.fetchActiveServiceNames()
             let isEnabled = await NetworkSetupService.isProxyEnabled(serviceNames: serviceNames)
             if !Task.isCancelled {
+                if !isEnabled {
+                    // 判定为关闭时，确保所有代理都关掉（避免残留个别开关开着）
+                    try? await NetworkSetupService.setAllProxyStates(
+                        serviceNames: serviceNames, enabled: false)
+                }
                 self.totalEnable = isEnabled
                 self.isRefreshingState = false
+                self.isLoading = false
             }
         }
 
