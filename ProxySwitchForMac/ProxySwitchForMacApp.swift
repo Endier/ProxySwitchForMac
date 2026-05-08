@@ -76,7 +76,9 @@ struct ProxySwitchForMacApp: App {
             }
             .keyboardShortcut("q", modifiers: .command)
         } label: {
-            if appState.totalEnable {
+            if appState.isLoading {
+                Image(systemName: "network")
+            } else if appState.totalEnable {
                 Image(systemName: "network.badge.shield.half.filled")
             } else {
                 Image(systemName: "network.slash")

@@ -67,23 +67,28 @@ enum NetworkSetupService {
         return true
     }
 
-    /// 批量开关代理（HTTP、HTTPS、SOCKS），失败时抛出第一个错误
+    /// 批量开关代理（HTTP、HTTPS、SOCKS），失败时撤销已成功的操作再抛出错误
     static func setAllProxyStates(serviceNames: [String], enabled: Bool) async throws {
         let arguments = [
             "-setwebproxystate", "-setsecurewebproxystate",
             "-setsocksfirewallproxystate",
         ]
-        for serviceName in serviceNames {
-            for argument in arguments {
-                do {
+        var completed: [(argument: String, serviceName: String)] = []
+        do {
+            for serviceName in serviceNames {
+                for argument in arguments {
                     try await toggleProxy(
                         argument: argument, serviceName: serviceName, enable: enabled)
-                } catch let error as NetworkSetupError {
-                    throw error
-                } catch {
-                    throw NetworkSetupError.invalidOutput
+                    completed.append((argument, serviceName))
                 }
             }
+        } catch {
+            // 撤销已成功的操作，逆序保证依赖顺序
+            for (argument, serviceName) in completed.reversed() {
+                try? await toggleProxy(
+                    argument: argument, serviceName: serviceName, enable: !enabled)
+            }
+            throw error
         }
     }
 
@@ -145,16 +150,16 @@ class SystemProxyStatus {
     var totalEnable: Bool = true {
         didSet {
             guard !isRefreshingState else { return }
-            toggleTask?.cancel()
             let isEnabled = totalEnable
-            toggleTask = Task { @MainActor in
+            // 排队等上一个任务自然完成，避免取消导致的续体 race
+            toggleTask = Task { [previousTask = toggleTask] in
+                _ = await previousTask?.value
                 let serviceNames = await Self.fetchActiveServiceNames()
                 do {
                     try await NetworkSetupService.setAllProxyStates(
                         serviceNames: serviceNames, enabled: isEnabled)
                     sendNotification(isOn: isEnabled)
                 } catch {
-                    guard !Task.isCancelled else { return }
                     isRefreshingState = true
                     totalEnable = !isEnabled
                     isRefreshingState = false
