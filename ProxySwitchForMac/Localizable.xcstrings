@@ -18,23 +18,6 @@
         }
       }
     },
-    "正在检测当前代理状态…" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Checking current proxy status…"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "正在检测当前代理状态…"
-          }
-        }
-      }
-    },
     "Customize global shortcut" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -88,6 +71,9 @@
           }
         }
       }
+    },
+    "Show notification when toggling" : {
+
     },
     "Status" : {
       "localizations" : {
@@ -164,6 +150,23 @@
     },
     "打开设置" : {
 
+    },
+    "正在检测当前代理状态…" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checking current proxy status…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在检测当前代理状态…"
+          }
+        }
+      }
     },
     "获取" : {
       "extractionState" : "manual",

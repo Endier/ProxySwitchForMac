@@ -1,6 +1,19 @@
 import Foundation
 import UserNotifications
 
+/// 通知开关的 UserDefaults key
+private let notificationEnabledKey = "notificationEnabled"
+
+/// 检查用户是否开启了通知
+func isNotificationEnabled() -> Bool {
+    UserDefaults.standard.object(forKey: notificationEnabledKey) as? Bool ?? true
+}
+
+/// 设置通知开关
+func setNotificationEnabled(_ enabled: Bool) {
+    UserDefaults.standard.set(enabled, forKey: notificationEnabledKey)
+}
+
 func requestNotificationPermission() {
     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) {
         _, error in
@@ -11,6 +24,8 @@ func requestNotificationPermission() {
 }
 
 func sendNotification(isOn: Bool) {
+    guard isNotificationEnabled() else { return }
+
     let content = UNMutableNotificationContent()
     content.title = String(localized: "AppName")
     if isOn {
@@ -31,6 +46,8 @@ func sendNotification(isOn: Bool) {
 }
 
 func sendErrorNotification(error: Error) {
+    guard isNotificationEnabled() else { return }
+
     let content = UNMutableNotificationContent()
     content.title = String(localized: "AppName")
     content.body = String(localized: "Failed to toggle proxy: \(error.localizedDescription)")

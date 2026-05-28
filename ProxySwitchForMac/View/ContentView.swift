@@ -12,18 +12,26 @@ import UserNotifications
 
 struct ContentView: View {
     @Bindable var appState: SystemProxyStatus
+    @State private var selectedTab: Tab = .settings
+
+    enum Tab: String, CaseIterable {
+        case settings
+        case permission
+    }
 
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             ProxySettingView(appState: appState)
                 .tabItem {
                     Label("Settings", systemImage: "gear")
                 }
+                .tag(Tab.settings)
 
             PermissionView()
                 .tabItem {
                     Label("Permission", systemImage: "hand.raised.square.on.square.fill")
                 }
+                .tag(Tab.permission)
         }
     }
 }
@@ -56,6 +64,7 @@ struct ProxySettingView: View {
 
 struct PermissionView: View {
     @State private var authorizationStatus: UNAuthorizationStatus = .notDetermined
+    @AppStorage("notificationEnabled") private var notificationEnabled: Bool = true
 
     var body: some View {
         Form {
@@ -93,6 +102,13 @@ struct PermissionView: View {
                             checkStatus()
                         }
                     }
+                }
+                
+                Toggle(isOn: $notificationEnabled) {
+                    Text("Show notification when toggling")
+                }
+                .onChange(of: notificationEnabled) { _, newValue in
+                    setNotificationEnabled(newValue)
                 }
             }
         }
