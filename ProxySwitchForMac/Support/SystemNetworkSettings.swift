@@ -28,10 +28,10 @@ enum NetworkSetupService {
         let output = try await run(arguments: ["-listallnetworkservices"])
         return
             output
-            .components(separatedBy: .newlines)
-            .dropFirst()
-            .map { String($0) }
-            .filter { !$0.hasPrefix("*") && !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+                .components(separatedBy: .newlines)
+                .dropFirst()
+                .map { String($0) }
+                .filter { !$0.hasPrefix("*") && !$0.trimmingCharacters(in: .whitespaces).isEmpty }
     }
 
     /// 获取指定服务的代理设置（HTTP/HTTPS/SOCKS）
@@ -62,8 +62,8 @@ enum NetworkSetupService {
         for serviceName in serviceNames {
             for argument in arguments {
                 if let setting = try? await getProxySetting(
-                    argument: argument, serviceName: serviceName)
-                {
+                    argument: argument, serviceName: serviceName
+                ) {
                     // 有代理配置：检查是否开启
                     if setting.enable == "Yes" {
                         anyEnabled = true
@@ -92,7 +92,8 @@ enum NetworkSetupService {
             for argument in arguments {
                 do {
                     try await toggleProxy(
-                        argument: argument, serviceName: serviceName, enable: enabled)
+                        argument: argument, serviceName: serviceName, enable: enabled
+                    )
                 } catch {
                     failures += 1
                 }
@@ -101,7 +102,8 @@ enum NetworkSetupService {
         let total = serviceNames.count * arguments.count
         if failures == total {
             throw NetworkSetupError.commandFailed(
-                status: -1, message: "所有代理开关操作均失败")
+                status: -1, message: "所有代理开关操作均失败"
+            )
         }
     }
 
@@ -122,13 +124,14 @@ enum NetworkSetupService {
             process.terminationHandler = { _ in
                 let errorMessage =
                     (try? errorPipe.fileHandleForReading.readToEnd())
-                    .flatMap { String(data: $0, encoding: .utf8) } ?? ""
+                        .flatMap { String(data: $0, encoding: .utf8) } ?? ""
 
                 guard process.terminationStatus == 0 else {
                     continuation.resume(
                         throwing: NetworkSetupError.commandFailed(
                             status: process.terminationStatus,
-                            message: errorMessage))
+                            message: errorMessage
+                        ))
                     return
                 }
 
@@ -184,7 +187,8 @@ class SystemProxyStatus {
                 let serviceNames = await Self.fetchActiveServiceNames()
                 do {
                     try await NetworkSetupService.setAllProxyStates(
-                        serviceNames: serviceNames, enabled: isEnabled)
+                        serviceNames: serviceNames, enabled: isEnabled
+                    )
                     sendNotification(isOn: isEnabled)
                 } catch {
                     isRefreshingState = true
@@ -211,17 +215,16 @@ class SystemProxyStatus {
                 if !isEnabled {
                     // 判定为关闭时，确保所有代理都关掉（避免残留个别开关开着）
                     try? await NetworkSetupService.setAllProxyStates(
-                        serviceNames: serviceNames, enabled: false)
+                        serviceNames: serviceNames, enabled: false
+                    )
                 }
                 self.totalEnable = isEnabled
                 self.isRefreshingState = false
                 self.isLoading = false
-            }
-        }
 
-        KeyboardShortcuts.onKeyDown(for: .proxySwitch) { [weak self] in
-            Task { @MainActor in
-                self?.totalEnable.toggle()
+                KeyboardShortcuts.onKeyDown(for: .proxySwitch) {
+                    self.totalEnable.toggle()
+                }
             }
         }
     }
@@ -239,5 +242,5 @@ class SystemProxyStatus {
 // MARK: - KeyboardShortcuts
 
 extension KeyboardShortcuts.Name {
-    static let proxySwitch = Self("proxySwitch", default: .init(.j, modifiers: .command))
+    static let proxySwitch = Self("proxySwitch", initial: .init(.j, modifiers: .command))
 }
