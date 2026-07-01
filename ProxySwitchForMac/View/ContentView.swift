@@ -136,9 +136,9 @@ struct PermissionView: View {
 }
 
 #Preview {
-    ProxySettingView(appState: SystemProxyStatus())
+    ProxySettingView(appState: SystemProxyStatus(previewEnabled: true))
 }
 
 #Preview {
-    ContentView(appState: SystemProxyStatus())
+    ContentView(appState: SystemProxyStatus(previewEnabled: true))
 }

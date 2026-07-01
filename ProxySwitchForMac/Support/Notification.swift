@@ -14,6 +14,8 @@ func setNotificationEnabled(_ enabled: Bool) {
     UserDefaults.standard.set(enabled, forKey: notificationEnabledKey)
 }
 
+// 以下三个方法因为调用了 UNUserNotificationCenter（非 Sendable）和 UserDefaults，所以只能在 @MainActor 里调用，不然会有 data race
+@MainActor
 func requestNotificationPermission() {
     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) {
         _, error in
@@ -23,6 +25,7 @@ func requestNotificationPermission() {
     }
 }
 
+@MainActor
 func sendNotification(isOn: Bool) {
     guard isNotificationEnabled() else { return }
 
@@ -45,6 +48,7 @@ func sendNotification(isOn: Bool) {
     }
 }
 
+@MainActor
 func sendErrorNotification(error: Error) {
     guard isNotificationEnabled() else { return }
 
