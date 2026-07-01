@@ -177,54 +177,51 @@ enum NetworkSetupService {
 @Observable
 class SystemProxyStatus {
     /// 当前代理开启状态
-    var totalEnable: Bool = true {
-        didSet {
-            guard !isRefreshingState else { return }
-            let isEnabled = totalEnable
-            // 排队等上一个任务自然完成，避免取消导致的续体 race
-            toggleTask = Task { [previousTask = toggleTask] in
-                _ = await previousTask?.value
-                let serviceNames = await Self.fetchActiveServiceNames()
-                do {
-                    try await NetworkSetupService.setAllProxyStates(
-                        serviceNames: serviceNames, enabled: isEnabled
-                    )
-                    sendNotification(isOn: isEnabled)
-                } catch {
-                    isRefreshingState = true
-                    totalEnable = !isEnabled
-                    isRefreshingState = false
-                    sendErrorNotification(error: error)
-                }
-            }
-        }
-    }
+    var totalEnable: Bool = true
 
     /// 初始状态加载中，UI 应显示加载动画而非实际状态
     private(set) var isLoading = true
 
     private var toggleTask: Task<Void, Never>?
-    /// 初始状态为 `true`，防止 `didSet` 在初始状态加载时触发 toggle
-    private var isRefreshingState = true
 
-    nonisolated init() {
-        Task { @MainActor in
+    @MainActor
+    init() {
+        KeyboardShortcuts.onKeyDown(for: .proxySwitch) {
+            Task { /*@MainActor in*/
+                self.setProxyEnabled(!self.totalEnable)
+            }
+        }
+
+        Task {
             let serviceNames = await Self.fetchActiveServiceNames()
             let isEnabled = await NetworkSetupService.isProxyEnabled(serviceNames: serviceNames)
-            if !Task.isCancelled {
-                if !isEnabled {
-                    // 判定为关闭时，确保所有代理都关掉（避免残留个别开关开着）
-                    try? await NetworkSetupService.setAllProxyStates(
-                        serviceNames: serviceNames, enabled: false
-                    )
-                }
-                self.totalEnable = isEnabled
-                self.isRefreshingState = false
-                self.isLoading = false
+            if !isEnabled {
+                // 判定为关闭时，确保所有代理都关掉（避免残留个别开关开着）
+                try? await NetworkSetupService.setAllProxyStates(
+                    serviceNames: serviceNames, enabled: false
+                )
+            }
+            self.totalEnable = isEnabled
+            self.isLoading = false
+        }
+    }
 
-                KeyboardShortcuts.onKeyDown(for: .proxySwitch) {
-                    self.totalEnable.toggle()
-                }
+    /// 开关代理，由 UI Toggle 和快捷键统一调用
+    func setProxyEnabled(_ enabled: Bool) {
+        guard totalEnable != enabled else { return }
+        totalEnable = enabled
+
+        toggleTask = Task { [previousTask = toggleTask] in
+            _ = await previousTask?.value
+            let serviceNames = await Self.fetchActiveServiceNames()
+            do {
+                try await NetworkSetupService.setAllProxyStates(
+                    serviceNames: serviceNames, enabled: enabled
+                )
+                sendNotification(isOn: enabled)
+            } catch {
+                self.totalEnable = !enabled
+                sendErrorNotification(error: error)
             }
         }
     }
