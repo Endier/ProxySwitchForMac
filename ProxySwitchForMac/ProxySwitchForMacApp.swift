@@ -78,7 +78,7 @@ struct ProxySwitchForMacApp: App {
         } label: {
             if appState.isLoading {
                 Image(systemName: "network")
-            } else if appState.totalEnable {
+            } else if appState.isProxyOn {
                 Image(systemName: "network.badge.shield.half.filled")
             } else {
                 Image(systemName: "network.slash")

@@ -8,6 +8,16 @@ struct ProxySetting {
     let enable: Bool
     let server: String
     let port: String
+
+    /// 是否已真正启用（排除 networksetup 对未配置代理返回的 "(null)" 误判）
+    var isActive: Bool {
+        enable && !server.isEmpty && server != "(null)"
+    }
+
+    /// 是否已配置地址（无论开关是否打开），用于决定开启时是否启用该代理
+    var isConfigured: Bool {
+        !server.isEmpty && server != "(null)"
+    }
 }
 
 // MARK: - NetworkSetupError
@@ -52,56 +62,67 @@ enum NetworkSetupService {
         try await run(arguments: [argument, serviceName, state])
     }
 
-    /// 检查当前代理是否「全开」——所有活跃服务的 HTTP、HTTPS、SOCKS 都必须为 Yes
+    /// 判断当前代理是否「生效」：任一活跃服务上任一代理类型已启用即视为开。
     ///
-    /// 跳过没有配置代理的服务或代理类型（server 为空或命令失败），
-    /// 只检查实际存在配置的代理是否全部开启。
+    /// 不再要求 HTTP/HTTPS/SOCKS 全部开启（现实里往往只配了其中一两个），
+    /// 也不再因未配置代理返回的 `"(null)"` 而误判为「已配置但关闭」。
     static func isProxyEnabled(serviceNames: [String]) async -> Bool {
         let arguments = ["-getwebproxy", "-getsecurewebproxy", "-getsocksfirewallproxy"]
-        var anyEnabled = false
         for serviceName in serviceNames {
             for argument in arguments {
                 if let setting = try? await getProxySetting(
                     argument: argument, serviceName: serviceName
-                ) {
-                    // 有代理配置：检查是否开启
-                    if setting.enable {
-                        anyEnabled = true
-                    } else if !setting.server.isEmpty {
-                        // 已配置但未开启 → 不算全开
-                        return false
-                    }
+                ), setting.isActive {
+                    return true
                 }
-                // setting 为 nil 或无 server：该服务未使用此代理类型，跳过
             }
         }
-        return anyEnabled
+        return false
     }
 
     /// 批量开关代理（HTTP、HTTPS、SOCKS）
     ///
-    /// 开启时（`enabled: true`）：跳过个别失败的代理类型（如未配置 SOCKS），
-    /// 仅当全部失败时才抛出错误。关闭时一律尝试，全部失败才抛出错误。
+    /// - 关闭（`enabled: false`）：对所有服务、所有代理类型一律尝试关闭（关闭永远安全、无歧义）。
+    /// - 开启（`enabled: true`）：仅对**已配置地址**的代理类型启用；未配置（server 为 `"(null)"`/空）的
+    ///   代理保持原样，避免去「开启一个没有服务器的代理」。
+    ///
+    /// 仅当「有需要操作的目标且全部失败」时才抛出错误。
     static func setAllProxyStates(serviceNames: [String], enabled: Bool) async throws {
+        let getArgs = ["-getwebproxy", "-getsecurewebproxy", "-getsocksfirewallproxy"]
+        let setArgs = ["-setwebproxystate", "-setsecurewebproxystate", "-setsocksfirewallproxystate"]
+
         try await withThrowingTaskGroup(of: Bool.self) { group in
             for serviceName in serviceNames {
-                for argument in ["-setwebproxystate", "-setsecurewebproxystate", "-setsocksfirewallproxystate"] {
-                    group.addTask { [argument, serviceName] in
-                        do {
-                            try await toggleProxy(argument: argument, serviceName: serviceName, enable: enabled)
-                            return true
-                        } catch {
-                            return false
+                for i in getArgs.indices {
+                    let getArg = getArgs[i]
+                    let setArg = setArgs[i]
+                    group.addTask {
+                        if !enabled {
+                            // 关闭：对所有服务、所有代理类型一律尝试
+                            return (try? await toggleProxy(
+                                argument: setArg, serviceName: serviceName, enable: false
+                            )) != nil
                         }
+                        // 开启：仅启用已配置地址的代理；未配置则跳过（视为成功，避免误报失败）
+                        guard let setting = try? await getProxySetting(
+                            argument: getArg, serviceName: serviceName
+                        ), setting.isConfigured else {
+                            return true
+                        }
+                        return (try? await toggleProxy(
+                            argument: setArg, serviceName: serviceName, enable: true
+                        )) != nil
                     }
                 }
             }
+
+            var attempted = 0
             var failures = 0
             for try await succeeded in group {
+                attempted += 1
                 if !succeeded { failures += 1 }
             }
-            let total = serviceNames.count * 3
-            if failures == total {
+            if attempted > 0, failures == attempted {
                 throw NetworkSetupError.commandFailed(
                     status: -1, message: "所有代理开关操作均失败"
                 )
@@ -178,8 +199,8 @@ enum NetworkSetupService {
 @MainActor
 @Observable
 class SystemProxyStatus {
-    /// 当前代理开启状态
-    var totalEnable: Bool = true
+    /// 当前代理是否生效（任一代理已启用即视为开）
+    var isProxyOn: Bool = true
 
     /// 初始状态加载中，UI 应显示加载动画而非实际状态
     private(set) var isLoading = true
@@ -189,7 +210,7 @@ class SystemProxyStatus {
     init() {
         KeyboardShortcuts.onKeyDown(for: .proxySwitch) {
             Task { @MainActor in
-                self.setProxyEnabled(!self.totalEnable)
+                self.setProxyEnabled(!self.isProxyOn)
             }
         }
 
@@ -198,29 +219,24 @@ class SystemProxyStatus {
 
     /// SwiftUI Preview 专用，跳过 networksetup 调用
     init(previewEnabled: Bool) {
-        totalEnable = previewEnabled
+        isProxyOn = previewEnabled
         isLoading = false
     }
 
     private func performInitialLoad() {
         Task {
             let serviceNames = await Self.fetchActiveServiceNames()
+            // 仅读取实际状态用于初始化显示，绝不主动改写系统代理配置
             let isEnabled = await NetworkSetupService.isProxyEnabled(serviceNames: serviceNames)
-            if !isEnabled {
-                // 判定为关闭时，确保所有代理都关掉（避免残留个别开关开着）
-                try? await NetworkSetupService.setAllProxyStates(
-                    serviceNames: serviceNames, enabled: false
-                )
-            }
-            self.totalEnable = isEnabled
+            self.isProxyOn = isEnabled
             self.isLoading = false
         }
     }
 
     /// 开关代理，由 UI Toggle 和快捷键统一调用
     func setProxyEnabled(_ enabled: Bool) {
-        guard totalEnable != enabled else { return }
-        totalEnable = enabled
+        guard isProxyOn != enabled else { return }
+        isProxyOn = enabled
 
         toggleTask = Task { [previousTask = toggleTask] in
             _ = await previousTask?.value
@@ -231,7 +247,7 @@ class SystemProxyStatus {
                 )
                 sendNotification(isOn: enabled)
             } catch {
-                self.totalEnable = !enabled
+                self.isProxyOn = !enabled
                 sendErrorNotification(error: error)
             }
         }

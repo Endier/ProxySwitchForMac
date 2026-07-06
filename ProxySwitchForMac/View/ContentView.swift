@@ -48,7 +48,7 @@ struct ProxySettingView: View {
                 Form {
                     Section {
                         Toggle(isOn: Binding(
-                            get: { appState.totalEnable },
+                            get: { appState.isProxyOn },
                             set: { appState.setProxyEnabled($0) }
                         )) {
                             Text("Status")
