@@ -1,68 +1,100 @@
 import Foundation
 import UserNotifications
 
-/// 通知开关的 UserDefaults key
-private let notificationEnabledKey = "notificationEnabled"
-
-/// 检查用户是否开启了通知
-func isNotificationEnabled() -> Bool {
-    UserDefaults.standard.object(forKey: notificationEnabledKey) as? Bool ?? true
+/// 桥接非 Sendable 闭包到 @Sendable 上下文用的盒子。
+/// requestAuthorization 的回调是 @Sendable，无法直接捕获普通 `() -> Void`，
+/// 这里显式断言其可跨并发域传递（UI 回调本就在主线程使用，安全）。
+private struct CallbackBox: @unchecked Sendable {
+    let call: () -> Void
 }
 
-/// 设置通知开关
-func setNotificationEnabled(_ enabled: Bool) {
-    UserDefaults.standard.set(enabled, forKey: notificationEnabledKey)
-}
+/// 通知相关能力的命名空间，与 NetworkSetupService 同风格（不可实例化的实用类型集合）。
+enum NotificationService {
+    /// 通知开关的 UserDefaults key（与 ContentView 的 @AppStorage 共用，避免硬编码重复）
+    static let enabledKey = "notificationEnabled"
 
-// 以下三个方法因为调用了 UNUserNotificationCenter（非 Sendable）和 UserDefaults，所以只能在 @MainActor 里调用，不然会有 data race
-@MainActor
-func requestNotificationPermission() {
-    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) {
-        _, error in
-        if let error {
-            print(error.localizedDescription)
+    /// 检查用户是否开启了通知（与 ContentView 的 @AppStorage 读写同一份 UserDefaults，无需额外写入函数）
+    static func isEnabled() -> Bool {
+        UserDefaults.standard.object(forKey: enabledKey) as? Bool ?? true
+    }
+
+    /// 请求通知授权。调用了 UNUserNotificationCenter（非 Sendable），
+    /// 只能在 @MainActor 里调用，避免 data race。
+    @MainActor
+    static func requestPermission(completion: @escaping () -> Void = {}) {
+        // requestAuthorization 的回调是 @Sendable，无法直接捕获非 Sendable 的 completion；
+        // 用 CallbackBox 桥接，保持调用方签名不变且消除警告。
+        let box = CallbackBox(call: completion)
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) {
+            _, error in
+            if let error {
+                print(error.localizedDescription)
+            }
+            // 授权结果在回调返回后才真正落地，必须在回调内再查询设置状态，
+            // 避免外面立即 checkStatus() 读到仍是 notDetermined 的旧值。
+            box.call()
         }
     }
-}
 
-@MainActor
-func sendNotification(isOn: Bool) {
-    guard isNotificationEnabled() else { return }
+    @MainActor
+    static func send(isOn: Bool) {
+        guard isEnabled() else { return }
 
-    let content = UNMutableNotificationContent()
-    content.title = String(localized: "AppName")
-    if isOn {
-        content.body = String(localized: "Your network proxy has been turned ON.")
-    } else {
-        content.body = String(localized: "Your network proxy has been turned OFF.")
-    }
-    content.sound = UNNotificationSound.default
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "AppName")
+        if isOn {
+            content.body = String(localized: "Your network proxy has been turned ON.")
+        } else {
+            content.body = String(localized: "Your network proxy has been turned OFF.")
+        }
+        content.sound = UNNotificationSound.default
 
-    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-    let request = UNNotificationRequest(
-        identifier: "proxyStatusChanged", content: content, trigger: trigger)
-    UNUserNotificationCenter.current().add(request) { error in
-        if let error = error {
-            print("Failed to send notification: \(error)")
+        // 切换是即时操作，无需延时；trigger 为 nil 表示立即投递。
+        // 沿用固定 identifier，连续切换时新通知会替换旧的，天然去重。
+        let request = UNNotificationRequest(
+            identifier: "proxyStatusChanged", content: content, trigger: nil)
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Failed to send notification: \(error)")
+            }
         }
     }
-}
 
-@MainActor
-func sendErrorNotification(error: Error) {
-    guard isNotificationEnabled() else { return }
+    @MainActor
+    static func sendError(_ error: Error) {
+        guard isEnabled() else { return }
 
-    let content = UNMutableNotificationContent()
-    content.title = String(localized: "AppName")
-    content.body = String(localized: "Failed to toggle proxy: \(error.localizedDescription)")
-    content.sound = UNNotificationSound.default
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "AppName")
+        content.body = String(localized: "Failed to toggle proxy: \(error.localizedDescription)")
+        content.sound = UNNotificationSound.default
 
-    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-    let request = UNNotificationRequest(
-        identifier: "proxyToggleError", content: content, trigger: trigger)
-    UNUserNotificationCenter.current().add(request) { error in
-        if let error = error {
-            print("Failed to send error notification: \(error)")
+        // 错误通知同样即时投递；固定 identifier 确保连续出错时只保留最新一条。
+        let request = UNNotificationRequest(
+            identifier: "proxyToggleError", content: content, trigger: nil)
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Failed to send error notification: \(error)")
+            }
+        }
+    }
+
+    /// 预期的「提示」类通知（非失败）：如主服务未配置代理地址时拒绝开启，给用户信息而非报错。
+    @MainActor
+    static func sendInfo(_ message: String) {
+        guard isEnabled() else { return }
+
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "AppName")
+        content.body = message
+        content.sound = UNNotificationSound.default
+
+        let request = UNNotificationRequest(
+            identifier: "proxyInfo", content: content, trigger: nil)
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Failed to send info notification: \(error)")
+            }
         }
     }
 }

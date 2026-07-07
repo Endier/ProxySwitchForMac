@@ -23,13 +23,13 @@ struct ContentView: View {
         TabView(selection: $selectedTab) {
             ProxySettingView(appState: appState)
                 .tabItem {
-                    Label("Settings", systemImage: "gear")
+                    Label(String(localized: "Settings"), systemImage: "gear")
                 }
                 .tag(Tab.settings)
 
             PermissionView()
                 .tabItem {
-                    Label("Permission", systemImage: "hand.raised.square.on.square.fill")
+                    Label(String(localized: "Permission"), systemImage: "hand.raised.square.on.square.fill")
                 }
                 .tag(Tab.permission)
         }
@@ -42,7 +42,7 @@ struct ProxySettingView: View {
     var body: some View {
         Group {
             if appState.isLoading {
-                ProgressView("正在检测当前代理状态…")
+                ProgressView(String(localized: "正在检测当前代理状态…"))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 Form {
@@ -51,11 +51,11 @@ struct ProxySettingView: View {
                             get: { appState.isProxyOn },
                             set: { appState.setProxyEnabled($0) }
                         )) {
-                            Text("Status")
+                            Text(String(localized: "Status"))
                         }
 
                         KeyboardShortcuts.Recorder(
-                            "Customize global shortcut", name: .proxySwitch
+                            String(localized: "Customize global shortcut"), name: .proxySwitch
                         )
                     }
                 }
@@ -67,30 +67,31 @@ struct ProxySettingView: View {
 
 struct PermissionView: View {
     @State private var authorizationStatus: UNAuthorizationStatus = .notDetermined
-    @AppStorage("notificationEnabled") private var notificationEnabled: Bool = true
+    @AppStorage(NotificationService.enabledKey) private var notificationEnabled: Bool = true
 
     var body: some View {
         Form {
             Section {
                 HStack {
-                    Text("获取通知权限")
+                    Text(String(localized: "获取通知权限"))
 
                     Spacer()
 
                     switch authorizationStatus {
                     case .notDetermined:
-                        Button("获取") {
-                            requestNotificationPermission()
-                            checkStatus()
+                        Button(String(localized: "获取")) {
+                            NotificationService.requestPermission {
+                                checkStatus()
+                            }
                         }
                     case .authorized, .provisional, .ephemeral:
-                        Text("已授权")
+                        Text(String(localized: "已授权"))
                             .foregroundColor(.green)
                     case .denied:
                         HStack(spacing: 4) {
-                            Text("已拒绝")
+                            Text(String(localized: "已拒绝"))
                                 .foregroundColor(.red)
-                            Button("打开设置") {
+                            Button(String(localized: "打开设置")) {
                                 if let url = URL(
                                     string:
                                         "x-apple.systempreferences:com.apple.preference.notifications"
@@ -100,18 +101,16 @@ struct PermissionView: View {
                             }
                         }
                     @unknown default:
-                        Button("获取") {
-                            requestNotificationPermission()
-                            checkStatus()
+                        Button(String(localized: "获取")) {
+                            NotificationService.requestPermission {
+                                checkStatus()
+                            }
                         }
                     }
                 }
-                
+
                 Toggle(isOn: $notificationEnabled) {
-                    Text("Show notification when toggling")
-                }
-                .onChange(of: notificationEnabled) { _, newValue in
-                    setNotificationEnabled(newValue)
+                    Text(String(localized: "Show notification when toggling"))
                 }
             }
         }
