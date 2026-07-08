@@ -36,23 +36,19 @@ enum NotificationService {
         }
     }
 
-    @MainActor
-    static func send(isOn: Bool) {
+    /// 统一发送一条通知：固定标题(AppName)、即时投递(trigger 为 nil)；
+    /// 固定 identifier 使连续同类型通知替换旧的、天然去重；仅在用户开启通知时发送。
+    /// 各公开方法只负责组装 body 文本与 identifier。
+    private static func post(body: String, identifier: String) {
         guard isEnabled() else { return }
 
         let content = UNMutableNotificationContent()
         content.title = String(localized: "AppName")
-        if isOn {
-            content.body = String(localized: "Your network proxy has been turned ON.")
-        } else {
-            content.body = String(localized: "Your network proxy has been turned OFF.")
-        }
+        content.body = body
         content.sound = UNNotificationSound.default
 
-        // 切换是即时操作，无需延时；trigger 为 nil 表示立即投递。
-        // 沿用固定 identifier，连续切换时新通知会替换旧的，天然去重。
         let request = UNNotificationRequest(
-            identifier: "proxyStatusChanged", content: content, trigger: nil)
+            identifier: identifier, content: content, trigger: nil)
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {
                 print("Failed to send notification: \(error)")
@@ -61,40 +57,24 @@ enum NotificationService {
     }
 
     @MainActor
+    static func send(isOn: Bool) {
+        let body = isOn
+            ? String(localized: "Your network proxy has been turned ON.")
+            : String(localized: "Your network proxy has been turned OFF.")
+        post(body: body, identifier: "proxyStatusChanged")
+    }
+
+    @MainActor
     static func sendError(_ error: Error) {
-        guard isEnabled() else { return }
-
-        let content = UNMutableNotificationContent()
-        content.title = String(localized: "AppName")
-        content.body = String(localized: "Failed to toggle proxy: \(error.localizedDescription)")
-        content.sound = UNNotificationSound.default
-
-        // 错误通知同样即时投递；固定 identifier 确保连续出错时只保留最新一条。
-        let request = UNNotificationRequest(
-            identifier: "proxyToggleError", content: content, trigger: nil)
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                print("Failed to send error notification: \(error)")
-            }
-        }
+        post(
+            body: String(localized: "Failed to toggle proxy: \(error.localizedDescription)"),
+            identifier: "proxyToggleError"
+        )
     }
 
     /// 预期的「提示」类通知（非失败）：如主服务未配置代理地址时拒绝开启，给用户信息而非报错。
     @MainActor
     static func sendInfo(_ message: String) {
-        guard isEnabled() else { return }
-
-        let content = UNMutableNotificationContent()
-        content.title = String(localized: "AppName")
-        content.body = message
-        content.sound = UNNotificationSound.default
-
-        let request = UNNotificationRequest(
-            identifier: "proxyInfo", content: content, trigger: nil)
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                print("Failed to send info notification: \(error)")
-            }
-        }
+        post(body: message, identifier: "proxyInfo")
     }
 }

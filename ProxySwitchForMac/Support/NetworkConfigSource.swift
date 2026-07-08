@@ -8,12 +8,6 @@
 import Foundation
 import SystemConfiguration
 
-/// 一次进程内读取的结果：各服务代理设置 + 当前主路由服务（友好名）。
-struct NetworkConfigSnapshot {
-    let settings: [String: [ProxyType: ProxySetting]]
-    let primaryService: String?
-}
-
 /// 基于单一 SCDynamicStore 的网络配置数据源：既监听配置变更、又提供进程内读取。
 final class NetworkConfigSource {
     typealias ChangeHandler = () -> Void
@@ -55,7 +49,7 @@ final class NetworkConfigSource {
         // 2) Global 代理 App 不读取，订阅无意义；
         // 3) State 域是「生效中」状态，App 镜像的是偏好(Setup)，与 networksetup -getwebproxy 一致，
         //    且每次开关都会改 Setup，故无需额外订阅 State。
-        // 三大代理类型(web/secureWeb/socks)同属一个 Proxies 字典，任一改动只触发该服务一次回调。
+        // 三种代理类型(web/secureWeb/socksFirewall)同属一个 Proxies 字典，任一改动只触发该服务一次回调。
         let patterns: [CFString] = [
             "^Setup:/Network/Service/[^/]+/Proxies$" as CFString
         ]
@@ -73,46 +67,27 @@ final class NetworkConfigSource {
         stop()
     }
 
-    /// 进程内读取指定服务的代理状态与主服务。
-    /// 在 store 所在的串行队列上同步执行，与变更回调共用同一队列，避免跨线程访问同一 store。
-    func read(serviceNames: [String]) -> NetworkConfigSnapshot {
+    /// 进程内仅读取主路由服务一项（友好名 + 各代理类型设置）。
+    /// 与监听共用同一队列，避免跨线程访问同一 store。
+    func readPrimaryService() -> (name: String, settings: [ProxyType: ProxySetting])? {
         queue.sync { [store] in
-            Self.snapshot(from: store, serviceNames: serviceNames)
+            Self.primarySnapshot(from: store)
         }
     }
 
-    /// 进程内读取所有指定服务（一次性，自带临时 store，不依赖监听）。
-    /// 用于数据源创建失败时的降级，或开关时缓存为空的一次性回读。
-    static func snapshot(serviceNames: [String]) -> NetworkConfigSnapshot {
-        guard let store = SCDynamicStoreCreate(nil, "ProxySwitchForMac-Reader" as CFString, nil, nil) else {
-            return NetworkConfigSnapshot(settings: [:], primaryService: nil)
+    /// 进程内仅读取主路由服务一项（一次性，自带临时 store，不依赖监听）。
+    /// 用于数据源创建失败时的降级。
+    static func primarySnapshot() -> (name: String, settings: [ProxyType: ProxySetting])? {
+        guard let store = SCDynamicStoreCreate(nil, "ProxySwitchForMac-Primary" as CFString, nil, nil) else {
+            return nil
         }
-        return Self.snapshot(from: store, serviceNames: serviceNames)
-    }
-
-    /// 直接从 SCDynamicStore 枚举所有网络服务的友好名（UserDefinedName），
-    /// 用于 networksetup 失败时的回退，避免依赖猜测的英文名（中文 macOS 上 "以太网" 等会找不到服务导致开关失效）。
-    static func fetchAllServiceNames() -> [String] {
-        guard let store = SCDynamicStoreCreate(nil, "ProxySwitchForMac-ServiceNames" as CFString, nil, nil) else {
-            return []
-        }
-        let serviceKeys = (SCDynamicStoreCopyKeyList(store, "^Setup:/Network/Service/[^/]+$" as CFString) as? [CFString]) ?? []
-        var names: [String] = []
-        for key in serviceKeys {
-            guard let dict = SCDynamicStoreCopyValue(store, key) as? [String: Any],
-                  let name = dict[kSCPropUserDefinedName as String] as? String,
-                  !name.isEmpty
-            else { continue }
-            names.append(name)
-        }
-        return names
+        return Self.primarySnapshot(from: store)
     }
 
     // MARK: - 共享解析逻辑
 
-    /// 在给定 store 上解析 友好名→GUID 映射，并读取各服务代理状态与主服务。
-    private static func snapshot(from store: SCDynamicStore, serviceNames: [String]) -> NetworkConfigSnapshot {
-        // 枚举 store 中的服务（按 GUID 为键），建立 友好名 -> GUID 键 的映射。
+    /// 枚举 store 中的服务（按 GUID 为键），建立 友好名 -> GUID 键 的映射。
+    private static func nameToGuidMap(from store: SCDynamicStore) -> [String: String] {
         let serviceKeys = (SCDynamicStoreCopyKeyList(store, "^Setup:/Network/Service/[^/]+$" as CFString) as? [CFString]) ?? []
         var guidByName: [String: String] = [:]
         for key in serviceKeys {
@@ -121,29 +96,32 @@ final class NetworkConfigSource {
                 guidByName[name] = key as String
             }
         }
+        return guidByName
+    }
 
-        // 按传入的友好名列表，读取对应服务的 Proxies 字典并解析。
-        var result: [String: [ProxyType: ProxySetting]] = [:]
-        for name in serviceNames {
-            guard let guidKey = guidByName[name] else { continue }
-            let proxiesKey = ((guidKey as String) + "/Proxies") as CFString
-            guard let proxies = SCDynamicStoreCopyValue(store, proxiesKey) as? [String: Any] else { continue }
-            result[name] = ProxyType.allCases.reduce(into: [:]) { out, type in
-                out[type] = Self.parse(proxies, type: type)
-            }
+    /// 主路由服务：State:/Network/Global/IPv4 的 PrimaryService 是服务 GUID，
+    /// 反查 guidByName 得到友好名。无 IPv4 连接时拿不到，返回 nil。
+    private static func primaryServiceName(from store: SCDynamicStore, guidByName: [String: String]) -> String? {
+        guard let ipv4 = SCDynamicStoreCopyValue(store, "State:/Network/Global/IPv4" as CFString) as? [String: Any],
+              let primaryGUID = ipv4["PrimaryService"] as? String
+        else { return nil }
+        let primaryKey = "Setup:/Network/Service/\(primaryGUID)" as String
+        return guidByName.first(where: { $0.value == primaryKey })?.key
+    }
+
+    /// 仅读取主路由服务一项的代理配置（用于「只管主服务」模型）。
+    /// 只需枚举服务名做 GUID→名映射，再读主服务自身的 Proxies，不触碰其余服务。
+    /// 拿不到主服务（如无 IPv4 连接）时返回 nil。
+    private static func primarySnapshot(from store: SCDynamicStore) -> (name: String, settings: [ProxyType: ProxySetting])? {
+        let guidByName = nameToGuidMap(from: store)
+        guard let name = primaryServiceName(from: store, guidByName: guidByName),
+              let guidKey = guidByName[name] else { return nil }
+        let proxiesKey = ((guidKey as String) + "/Proxies") as CFString
+        guard let proxies = SCDynamicStoreCopyValue(store, proxiesKey) as? [String: Any] else { return nil }
+        let settings = ProxyType.allCases.reduce(into: [:]) { out, type in
+            out[type] = Self.parse(proxies, type: type)
         }
-
-        // 主路由服务：State:/Network/Global/IPv4 的 PrimaryService 是服务 GUID，
-        // 反查 guidByName 得到友好名。无 IPv4 连接时拿不到，返回 nil。
-        var primaryService: String?
-        if let ipv4 = SCDynamicStoreCopyValue(store, "State:/Network/Global/IPv4" as CFString) as? [String: Any],
-           let primaryGUID = ipv4["PrimaryService"] as? String
-        {
-            let primaryKey = "Setup:/Network/Service/\(primaryGUID)" as String
-            primaryService = guidByName.first(where: { $0.value == primaryKey })?.key
-        }
-
-        return NetworkConfigSnapshot(settings: result, primaryService: primaryService)
+        return (name, settings)
     }
 
     /// 从 Proxies 字典解析单个代理类型的设置。键缺失即视为未配置，无需处理 "(null)" 文本。

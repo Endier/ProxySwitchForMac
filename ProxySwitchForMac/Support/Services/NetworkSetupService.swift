@@ -10,96 +10,98 @@ import Foundation
 enum NetworkSetupService {
     private static let executableURL = URL(fileURLWithPath: "/usr/sbin/networksetup")
 
-    /// 获取所有活跃的网络服务名
-    static func getNetworkServiceNames() async throws -> [String] {
-        let output = try await run(arguments: ["-listallnetworkservices"])
-        return
-            output
-            .components(separatedBy: .newlines)
-            .dropFirst()
-            .map { String($0) }
-            .filter { !$0.hasPrefix("*") && !$0.trimmingCharacters(in: .whitespaces).isEmpty }
-    }
-
-    /// 获取当前活跃的网络服务名；失败或为空时回退到 SCDynamicStore 中的真实服务名，
-    /// 再不行才回退到常见英文名（最后兜底层）。
-    /// 归位于网络服务层，避免让 UI 状态对象承担基础设施职责。
-    static func fetchActiveServiceNames() async -> [String] {
-        guard let names = try? await getNetworkServiceNames(), !names.isEmpty else {
-            // networksetup 失败：回退到 SCDynamicStore 读到的真实 UserDefinedName，
-            // 而非猜测的英文名——中文 macOS 上 "以太网" 等会找不到服务导致开关失效。
-            let fallback = NetworkConfigSource.fetchAllServiceNames()
-            return fallback.isEmpty ? ["Wi-Fi", "Ethernet"] : fallback
-        }
-        return names
-    }
-
     /// 开关指定代理
     static func toggleProxy(argument: String, serviceName: String, enable: Bool) async throws {
         let state = enable ? "on" : "off"
         try await run(arguments: [argument, serviceName, state])
     }
 
-    /// 写操作（开关代理）并发上限：限制同时 fork 的 networksetup 进程数。
-    static let maxConcurrent: Int = 6
+    /// 各代理类型的开关结果汇总，用于区分「全成功 / 部分失败 / 全失败」。
+    struct ProxyStatesResult {
+        /// 成功执行的代理类型。
+        let succeeded: Set<ProxyType>
+        /// 失败的代理类型及其真实错误文案（networksetup 的 stderr），仅用于日志与提示。
+        let failed: [ProxyType: String]
 
-    /// 批量开关代理（HTTP、HTTPS、SOCKS）
+        /// 全部失败（无任何类型成功），调用方应视为失败并回滚。
+        var isAllFailed: Bool { succeeded.isEmpty }
+        /// 部分失败（既有成功也有失败），调用方可据此补一条提示通知。
+        var isPartialFailure: Bool { !succeeded.isEmpty && !failed.isEmpty }
+    }
+
+    /// 对单个网络服务开关代理（HTTP、HTTPS、SOCKS）。
     ///
-    /// - 关闭（`enabled: false`）：对所有服务、所有代理类型一律尝试关闭（关闭永远安全、无歧义）。
-    /// - 开启（`enabled: true`）：仅对**已配置地址**的代理类型启用；未配置（server 为 `"(null)"`/空）的
-    ///   代理保持原样，避免去「开启一个没有服务器的代理」。
-    ///   `resolvedConfigured` 由调用方从缓存传入以避免重复读取，为空时回退到重新读取。
+    /// - 关闭（`enabled: false`）：对该服务所有代理类型一律关闭（关闭永远安全、无歧义）。
+    /// - 开启（`enabled: true`）：仅对**已配置地址**的代理类型启用；未配置地址的保持原样，
+    ///   避免去「开启一个没有服务器的代理」。`resolvedConfigured` 标记哪些类型已配置地址，
+    ///   由调用方（开关前直读）传入；为空（理论不会发生）时无任何操作，视为成功。
     ///
-    /// 仅当「有需要操作的目标且全部失败」时才抛出错误。并发执行由 AsyncSemaphore 限流。
-    static func setAllProxyStates(
-        serviceNames: [String],
+    /// 各类型并发执行，单个失败不影响其余；返回每种类型的成败明细：
+    /// 仅当**全部失败**时抛错（触发上层回滚），部分失败视为成功但由调用方补提示。
+    static func setProxyStates(
+        serviceName: String,
         enabled: Bool,
-        resolvedConfigured: [String: [ProxyType: Bool]]? = nil
-    ) async throws {
-        // 开启时由调用方从缓存（或 NetworkConfigSource 进程内读取）算出「已配置地址」映射后传入；
-        // 关闭时传 nil，表示对所有服务、所有类型一律关闭。
-        let resolved: [String: [ProxyType: Bool]]? = resolvedConfigured
-
-        // 组装本次真正要执行的操作：
-        //   关闭 = 全部（服务 × 类型）；开启 = 仅已配置地址的类型。
-        // 通过 ProxyType 把 get/set 参数按类型绑定，不再依赖两条平行数组的下标对齐。
-        let operations: [(serviceName: String, argument: String)] = serviceNames.flatMap { serviceName in
-            ProxyType.allCases.compactMap { type in
-                if resolved == nil {
-                    return (serviceName, type.setArgument)   // 关闭：全部保留
-                }
-                if resolved?[serviceName]?[type] == true {
-                    return (serviceName, type.setArgument)   // 开启：仅已配置地址
-                }
-                return nil
+        resolvedConfigured: [ProxyType: Bool]? = nil
+    ) async throws -> ProxyStatesResult {
+        // 关闭：所有类型；开启：仅已配置地址的类型。
+        let targets: [(type: ProxyType, argument: String)] = ProxyType.allCases.compactMap { type in
+            if enabled {
+                return resolvedConfigured?[type] == true ? (type, type.setArgument) : nil
             }
+            return (type, type.setArgument)
         }
 
         // 无可执行操作（如开启时没有任何代理配置地址）：视为成功，无需报错。
-        guard !operations.isEmpty else { return }
+        guard !targets.isEmpty else {
+            return ProxyStatesResult(succeeded: [], failed: [:])
+        }
 
-        // 并发执行：单个失败不影响其余，仅当全部失败时抛错；由信号量限制同时进行的进程数。
-        let semaphore = AsyncSemaphore(limit: maxConcurrent)
-        let anySucceeded = await withTaskGroup(of: Bool.self) { group in
-            for op in operations {
+        // 并发执行各类型，记录每个类型的成败与真实错误（单个失败不影响其余）。
+        // 错误只保留文案（String，Sendable），不在任务组间跨发 Error 协议值。
+        let (succeeded, failed) = await withTaskGroup(
+            of: (type: ProxyType, ok: Bool, message: String?).self
+        ) { group in
+            for (type, argument) in targets {
                 group.addTask {
-                    await semaphore.acquire()
-                    defer { await semaphore.release() }
-                    return (try? await toggleProxy(
-                        argument: op.argument, serviceName: op.serviceName, enable: enabled
-                    )) != nil
+                    do {
+                        try await toggleProxy(argument: argument, serviceName: serviceName, enable: enabled)
+                        return (type, true, nil)
+                    } catch {
+                        let message = (error as? NetworkSetupError)?.errorDescription
+                            ?? error.localizedDescription
+                        return (type, false, message)
+                    }
                 }
             }
-            var anySucceeded = false
-            for await ok in group where ok {
-                anySucceeded = true
+            var succeeded: Set<ProxyType> = []
+            var failed: [ProxyType: String] = [:]
+            for await (type, ok, message) in group {
+                if ok {
+                    succeeded.insert(type)
+                } else if let message {
+                    failed[type] = message
+                }
             }
-            return anySucceeded
+            return (succeeded, failed)
         }
 
-        if !anySucceeded {
-            throw NetworkSetupError.commandFailed(status: -1, message: "所有代理开关操作均失败")
+        let result = ProxyStatesResult(succeeded: succeeded, failed: failed)
+
+        // 记录失败类型的真实错误，便于排查（部分失败时用户不会收到报错通知）。
+        let action = enabled ? "开启" : "关闭"
+        for (type, message) in result.failed {
+            print("代理开关部分失败 [\(serviceName)] \(type.displayName) \(action)失败：\(message)")
         }
+
+        // 仅全部失败时抛错，触发上层回滚；部分失败视为成功（由调用方补提示）。
+        if result.isAllFailed {
+            let detail = result.failed.values.joined(separator: "；")
+            throw NetworkSetupError.commandFailed(
+                status: -1,
+                message: "所有代理开关操作均失败" + (detail.isEmpty ? "" : "：\(detail)")
+            )
+        }
+        return result
     }
 
     // MARK: - Private Helpers

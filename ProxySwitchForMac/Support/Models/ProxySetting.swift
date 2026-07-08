@@ -48,6 +48,15 @@ enum ProxyType: String, CaseIterable {
         }
     }
 
+    /// 用于通知文案与日志的友好名称。
+    var displayName: String {
+        switch self {
+        case .web: return "HTTP"
+        case .secureWeb: return "HTTPS"
+        case .socksFirewall: return "SOCKS"
+        }
+    }
+
     /// 对应 SCDynamicStore 中 Proxies 字典的键名（enable / server / port），
     /// 用于进程内直接读取代理状态，取代 networksetup 文本解析。
     var storeKeys: (enable: String, server: String, port: String) {
@@ -62,9 +71,18 @@ enum ProxyType: String, CaseIterable {
     }
 }
 
-/// 网络设置相关错误。
-enum NetworkSetupError: Error {
+/// 网络设置相关错误（networksetup 命令执行失败）。
+enum NetworkSetupError: LocalizedError {
     case commandFailed(status: Int32, message: String)
+
+    /// 直接暴露 networksetup 的真实报错（stderr），让用户看到确切失败原因，
+    /// 而非 Swift 默认的无信息文案。message 为空时回退到通用描述。
+    var errorDescription: String? {
+        switch self {
+        case .commandFailed(_, let message):
+            message.isEmpty ? "Network setup command failed." : message
+        }
+    }
 }
 
 /// 开关代理时的「可预期」错误（非系统命令失败），用于向用户给出明确提示。
@@ -72,11 +90,15 @@ enum ProxyToggleError: LocalizedError {
     /// 主路由服务未配置任何代理地址：开启后不会真正生效（UI 仍会因主服务无代理显示「关」），
     /// 故拒绝开启并提示用户先在主服务上配置代理。
     case primaryServiceNotConfigured(serviceName: String)
+    /// 无法确定主路由服务（如暂无活跃连接）：没有可操作的服务对象，故拒绝切换。
+    case primaryServiceUnknown
 
     var errorDescription: String? {
         switch self {
         case .primaryServiceNotConfigured(let serviceName):
             String(format: String(localized: "PrimaryServiceNoProxy %@"), serviceName)
+        case .primaryServiceUnknown:
+            String(localized: "PrimaryServiceUnknown")
         }
     }
 }

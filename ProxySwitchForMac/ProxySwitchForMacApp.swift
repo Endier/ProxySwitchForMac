@@ -9,7 +9,7 @@ import SwiftUI
 
 @main
 struct ProxySwitchForMacApp: App {
-    @State var appState = SystemProxyStatus(onToggleResult: { enabled, error in
+    @State var appState = SystemProxyStatus(onToggleResult: { enabled, error, outcome in
         if let error {
             if let toggleError = error as? ProxyToggleError {
                 // 预期拦截（如主服务未配置代理地址）：用「提示」而非「失败」措辞
@@ -17,6 +17,19 @@ struct ProxySwitchForMacApp: App {
             } else {
                 NotificationService.sendError(error)
             }
+        } else if let outcome, outcome.isPartialFailure {
+            // 整体成功但个别类型失败：补一条提示，告知哪些类型未生效
+            let ok = outcome.succeeded
+                .sorted { $0.displayName < $1.displayName }
+                .map(\.displayName)
+                .joined(separator: "、")
+            let bad = outcome.failed.keys
+                .sorted { $0.displayName < $1.displayName }
+                .map(\.displayName)
+                .joined(separator: "、")
+            NotificationService.sendInfo(
+                String(format: String(localized: "PartialProxyToggle %@ %@"), ok, bad)
+            )
         } else {
             NotificationService.send(isOn: enabled)
         }
