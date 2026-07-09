@@ -149,10 +149,16 @@ class SystemProxyStatus {
                 self.isProxyOn = !enabled
                 self.notifyToggleResult(enabled: enabled, error: error, outcome: nil)
             }
-            // 先解除「开关中」标记，再主动刷新一次真实状态，
-            // 确保在无 SCDynamicStore 事件时，应用自身操作的结果仍能反映到 UI。
+            // 解除「开关中」标记；但写入后不立即回读系统：networksetup 返回成功时，
+            // configd 往往尚未把本次变更提交到 SCDynamicStore，紧跟其后的回读会读到
+            // 「关闭前」的旧态，导致菜单栏图标出现「开→关→开→关」的回跳。
+            // 有 SCDynamicStore 时，本次写入会触发其回调、经 300ms 防抖后回读真实状态
+            // 来校正（含部分失败 / 外部改动）；无 SCDynamicStore 时没有任何事件源，
+            // 才在此主动回读一次，保证 UI 与系统一致。
             self.isToggling = false
-            await self.refreshStatus()
+            if configSource == nil {
+                await self.refreshStatus()
+            }
         }
     }
 
