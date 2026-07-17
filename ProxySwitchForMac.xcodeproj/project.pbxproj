@@ -103,6 +103,7 @@
 				C3F5E1C02C2B9FE6004DD66D /* Resources */,
 				C3245EA52D5F279900279B1B /* Embed PlugIns */,
 				C3264C9C2D879B0D00798BA2 /* CopyFiles */,
+				C33A44C630099C0F0009EA32 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -168,6 +169,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		C33A44C630099C0F0009EA32 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 8;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+			shellPath = /bin/sh;
+			shellScript = "#!/bin/sh\n\n# 提交总数作为构建号\nBUILD_NUMBER=$(git rev-list --count HEAD 2>/dev/null)\n\n# 兜底：不在 git 仓库 / 浅克隆拿不到时给个默认值\nif [ -z \"$BUILD_NUMBER\" ] || [ \"$BUILD_NUMBER\" -eq 0 ]; then\n  echo \"warning: 无法获取 git 提交数，构建号回退为 1\"\n  BUILD_NUMBER=1\nfi\n\nPLIST=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $BUILD_NUMBER\" \"$PLIST\"\necho \"CFBundleVersion = $BUILD_NUMBER（git commit count）\"\n\nTAG=$(git describe --tags --abbrev=0 2>/dev/null)\n\nif [ -n \"$TAG\" ]; then\n  VERSION=${TAG#v}   # 去掉 v 前缀\n  /usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString $VERSION\" \"$PLIST\"\n  echo \"CFBundleShortVersionString = $VERSION（来自 tag $TAG）\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		C3F5E1BE2C2B9FE6004DD66D /* Sources */ = {
@@ -327,6 +349,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"ProxySwitchForMac/Preview Content\"";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				FRAMEWORK_SEARCH_PATHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ProxySwitchForMac/Info.plist;
@@ -365,6 +388,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"ProxySwitchForMac/Preview Content\"";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				FRAMEWORK_SEARCH_PATHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ProxySwitchForMac/Info.plist;
